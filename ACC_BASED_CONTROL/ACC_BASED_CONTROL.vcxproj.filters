@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\epos_canopen">
+      <UniqueIdentifier>{dac25377-abdb-494b-a584-09959873b23d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\xsens_awinda">
+      <UniqueIdentifier>{a4ab4983-90ff-437f-a653-21b60059a128}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\xsawinda">
+      <UniqueIdentifier>{1749baa2-be57-447a-8b3e-c3ea61d33f0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\eposcan">
+      <UniqueIdentifier>{b0459278-3fcf-4e1f-adce-f25a556670fb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="nixnet.h">
+      <Filter>Header Files\epos_canopen</Filter>
+    </ClInclude>
+    <ClInclude Include="CAN_FRAME.h">
+      <Filter>Header Files\epos_canopen</Filter>
+    </ClInclude>
+    <ClInclude Include="EPOS_NETWORK.h">
+      <Filter>Header Files\epos_canopen</Filter>
+    </ClInclude>
+    <ClInclude Include="AXIS.h">
+      <Filter>Header Files\epos_canopen</Filter>
+    </ClInclude>
+    <ClInclude Include="findClosestUpdateRate.h">
+      <Filter>Header Files\xsens_awinda</Filter>
+    </ClInclude>
+    <ClInclude Include="mastercallback.h">
+      <Filter>Header Files\xsens_awinda</Filter>
+    </ClInclude>
+    <ClInclude Include="mtwcallback.h">
+      <Filter>Header Files\xsens_awinda</Filter>
+    </ClInclude>
+    <ClInclude Include="generalheader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="findClosestUpdateRate.cpp">
+      <Filter>Source Files\xsawinda</Filter>
+    </ClCompile>
+    <ClCompile Include="mastercallback.cpp">
+      <Filter>Source Files\xsawinda</Filter>
+    </ClCompile>
+    <ClCompile Include="mtwcallback.cpp">
+      <Filter>Source Files\xsawinda</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReleaseNotes.css" />
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>
