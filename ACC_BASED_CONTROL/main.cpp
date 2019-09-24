@@ -549,9 +549,9 @@ void Desabilita_Eixo(int ID)
 void Controle_Corrente(float accHum, float accExo, float velHum, float velExo)
 {
 	//Sincroniza a CAN
-	//epos.sync();
+	epos.sync();
 
 	eixo_in.ReadPDO01();
-	std::cout << eixo_in.PDOgetActualCurrent() << "\n";
+  std::cout << eixo_in.PDOgetActualCurrent() << "  " << eixo_in.PDOgetActualPosition() << "\n";
 
 }
