@@ -58,6 +58,12 @@
 
 
 
+void Habilita_Eixo(int ID);
+
+void Desabilita_Eixo(int ID);
+
+void Controle_Corrente(float accHum, float accExo, float velHum, float velExo);
+
 
 /*! \brief Stream insertion operator overload for XsPortInfo */
 std::ostream& operator << (std::ostream& out, XsPortInfo const & p)
@@ -186,20 +192,20 @@ int main(int argc, char** argv)
 	WirelessMasterCallback wirelessMasterCallback;			// Callback for wireless master
 	std::vector<MtwCallback*> mtwCallbacks;					// Callbacks for mtw devices
 
-	std::cout << "Constructing XsControl..." << std::endl;
+	//std::cout << "Constructing XsControl..." << std::endl;
 	XsControl* control = XsControl::construct();
 	if (control == 0)
 	{
 		std::cout << "Failed to construct XsControl instance." << std::endl;
-		return -1;
+		//return -1;
 	}
 
 	try
 	{
-		std::cout << "Scanning ports..." << std::endl;
+		//std::cout << "Scanning ports..." << std::endl;
 		XsPortInfoArray detectedDevices = XsScanner::scanPorts();
 
-		std::cout << "Finding wireless master..." << std::endl;
+		//std::cout << "Finding wireless master..." << std::endl;
 		XsPortInfoArray::const_iterator wirelessMasterPort = detectedDevices.begin();
 		while (wirelessMasterPort != detectedDevices.end() && !wirelessMasterPort->deviceId().isWirelessMaster())
 		{
@@ -219,7 +225,7 @@ int main(int argc, char** argv)
 			throw std::runtime_error(error.str());
 		}
 
-		std::cout << "Getting XsDevice instance for wireless master..." << std::endl;
+		//std::cout << "Getting XsDevice instance for wireless master..." << std::endl;
 		XsDevicePtr wirelessMasterDevice = control->device(wirelessMasterPort->deviceId());
 		if (wirelessMasterDevice == 0)
 		{
@@ -230,7 +236,7 @@ int main(int argc, char** argv)
 
 		std::cout << "XsDevice instance created @ " << *wirelessMasterDevice << std::endl;
 
-		std::cout << "Setting config mode..." << std::endl;
+		//std::cout << "Setting config mode..." << std::endl;
 		if (!wirelessMasterDevice->gotoConfig())
 		{
 			std::ostringstream error;
@@ -238,7 +244,7 @@ int main(int argc, char** argv)
 			throw std::runtime_error(error.str());
 		}
 
-		std::cout << "Attaching callback handler..." << std::endl;
+		//std::cout << "Attaching callback handler..." << std::endl;
 		wirelessMasterDevice->addCallbackHandler(&wirelessMasterCallback);
 
 		std::cout << "Getting the list of the supported update rates..." << std::endl;
@@ -282,7 +288,9 @@ int main(int argc, char** argv)
 
 		std::cout << "Waiting for MTW to wirelessly connect...\n" << std::endl;
 
+		bool quitOnMTw = false;
 		bool waitForConnections = true;
+
 		size_t connectedMTWCount = wirelessMasterCallback.getWirelessMTWs().size();
 		do
 		{
@@ -293,7 +301,7 @@ int main(int argc, char** argv)
 				size_t nextCount = wirelessMasterCallback.getWirelessMTWs().size();
 				if (nextCount != connectedMTWCount)
 				{
-					std::cout << "Number of connected MTWs: " << nextCount << ". Press 'Y' to start measurement." << std::endl;
+					std::cout << "Number of connected MTWs: " << nextCount << ". Press 'y' to start measurement or 'q' to quit" << std::endl;
 					connectedMTWCount = nextCount;
 				}
 				else
@@ -303,10 +311,24 @@ int main(int argc, char** argv)
 			}
 			if (_kbhit())
 			{
-				waitForConnections = (toupper((char)_getch()) != 'Y');
+				char keyp = (char)_getch();
+				if (keyp == 'y')
+					waitForConnections = false;
+				if (keyp == 'q')
+				{
+					quitOnMTw = true;
+					waitForConnections = false;
+				}
 			}
 		}
 		while (waitForConnections);
+
+		if (quitOnMTw)
+		{
+			wirelessMasterDevice->gotoConfig();
+			wirelessMasterDevice->disableRadio();
+			throw std::runtime_error("quit by user request");
+		}
 
 		std::cout << "Starting measurement..." << std::endl;
 		if (!wirelessMasterDevice->gotoMeasurement())
@@ -316,7 +338,7 @@ int main(int argc, char** argv)
 			throw std::runtime_error(error.str());
 		}
 
-		std::cout << "Getting XsDevice instances for all MTWs..." << std::endl;
+		//std::cout << "Getting XsDevice instances for all MTWs..." << std::endl;
 		XsDeviceIdArray allDeviceIds = control->deviceIds();
 		XsDeviceIdArray mtwDeviceIds;
 		for (XsDeviceIdArray::const_iterator i = allDeviceIds.begin(); i != allDeviceIds.end(); ++i)
@@ -340,7 +362,7 @@ int main(int argc, char** argv)
 			}
 		}
 
-		std::cout << "Attaching callback handlers to MTWs..." << std::endl;
+		//std::cout << "Attaching callback handlers to MTWs..." << std::endl;
 		mtwCallbacks.resize(mtwDevices.size());
 		for (int i = 0; i < (int)mtwDevices.size(); ++i)
 		{
@@ -348,15 +370,57 @@ int main(int argc, char** argv)
 			mtwDevices[i]->addCallbackHandler(mtwCallbacks[i]);
 		}
 
-		std::cout << "\nMain loop. Press any key to quit\n" << std::endl;
-		std::cout << "Waiting for data available..." << std::endl;
-
 		std::vector<XsVector> accData(mtwCallbacks.size());
 		std::vector<XsVector> gyroData(mtwCallbacks.size());
 
-		unsigned int printCounter = 0;
+		// Xsens MTw stops here to EPOS controller use the MTw data ...
 
-		while (!_kbhit()) {
+		std::cout << "MTw data available, do you want to continue? (y/n)" << std::endl;
+		bool cancel_control = false;
+
+		do
+		{
+			if (_kbhit())
+			{
+				char keyp = (char)_getch();
+				if (keyp == 'y')
+					break;
+				if (keyp == 'n')
+				{
+					cancel_control = true;
+					break;
+				}
+			}
+		} while(true);
+
+		if (cancel_control)
+		{
+			wirelessMasterDevice->gotoConfig();
+			wirelessMasterDevice->disableRadio();
+			throw std::runtime_error("quit by user request");
+		}
+
+		//Sincroniza as epos
+		epos.sync();
+
+		endwait = clock () + 1 * CLOCKS_PER_SEC ;
+		while (clock() < endwait) {}
+
+	
+		//Habilita o controle de corrente nos servomotores
+		eixo_in.VCS_SetOperationMode(CURRENT_MODE);
+				
+		eixo_out.ReadPDO01();
+		eixo_in.ReadPDO01();
+
+		Habilita_Eixo(2);
+
+		// Função de Controle (loop MTw + Controle) ...
+
+		std::cout << "Loop de Controle, pressione qualquer tecla para interromper!" << std::endl;
+
+		while (!_kbhit())
+		{
 			XsTime::msleep(0);
 
 			bool newDataAvailable = false;
@@ -376,24 +440,22 @@ int main(int argc, char** argv)
 
 			if (newDataAvailable)
 			{
-				// Don't print too often for performance. Console output is very slow.
-				if (printCounter % 500 == 0)
-				{
-					for (size_t i = 0; i < mtwCallbacks.size(); ++i)
-					{
-
-						std::cout << "[" << i << "]: ID: " << mtwCallbacks[i]->device().deviceId().toString().toStdString()
-								  << ", accX: " << std::setw(5) << std::fixed << std::setprecision(2) << accData[i].value(0)
-								  << ", accY: " << std::setw(5) << std::fixed << std::setprecision(2) << accData[i].value(1)
-								  << ", accZ: " << std::setw(5) << std::fixed << std::setprecision(2) << accData[i].value(2)
-								  << "\n";
-					}
-				}
-				++printCounter;
+				Controle_Corrente(
+					(float) accData[0].value(0), 
+					(float) accData[1].value(0), 
+					(float) gyroData[0].value(0), 
+					(float) gyroData[1].value(0));
 			}
-
 		}
 		(void)_getch();
+
+		//Zera o comando do motor
+		eixo_in.PDOsetCurrentSetpoint(0);
+		eixo_in.WritePDO01();
+
+		//Desabilita o Eixo
+		Desabilita_Eixo(0);
+
 
 		std::cout << "Setting config mode..." << std::endl;
 		if (!wirelessMasterDevice->gotoConfig())
@@ -440,7 +502,82 @@ int main(int argc, char** argv)
 	std::cout << "Successful exit." << std::endl;
 	std::cout << "Press [ENTER] to continue." << std::endl; std::cin.get();
 
-
-
 	return 0;
+}
+
+
+
+ /* EPOS FUNCTIONS */
+
+void Habilita_Eixo(int ID)
+{
+	
+    if ((ID==2) | (ID==0))
+	{
+        
+        eixo_in.PDOsetControlWord_SwitchOn(false);
+		eixo_in.PDOsetControlWord_EnableVoltage(true);
+		eixo_in.PDOsetControlWord_QuickStop(true);
+		eixo_in.PDOsetControlWord_EnableOperation(false);
+		eixo_in.WritePDO01();
+        
+		printf("\nENERGIZANDO O MOTOR 2 E HABILITANDO O CONTROLE");
+        
+		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
+		while (clock() < endwait) {}
+        
+		eixo_in.PDOsetControlWord_SwitchOn(true);
+		eixo_in.PDOsetControlWord_EnableVoltage(true);
+		eixo_in.PDOsetControlWord_QuickStop(true);
+		eixo_in.PDOsetControlWord_EnableOperation(false);
+		eixo_in.WritePDO01();
+		
+		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
+		while (clock() < endwait) {}
+        
+		eixo_in.PDOsetControlWord_SwitchOn(true);
+		eixo_in.PDOsetControlWord_EnableVoltage(true);
+		eixo_in.PDOsetControlWord_QuickStop(true);
+		eixo_in.PDOsetControlWord_EnableOperation(true);
+		eixo_in.WritePDO01();
+    
+    }
+    
+}
+
+
+void Desabilita_Eixo(int ID)
+{
+ 
+    if ((ID==2) | (ID==0))
+	{
+		printf("\nDESABILITANDO O MOTOR E CONTROLE");
+        
+		eixo_in.PDOsetControlWord_SwitchOn(true);
+		eixo_in.PDOsetControlWord_EnableVoltage(true);
+		eixo_in.PDOsetControlWord_QuickStop(true);
+		eixo_in.PDOsetControlWord_EnableOperation(false);
+		eixo_in.WritePDO01();
+        
+		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
+		while (clock() < endwait) {}
+        
+		eixo_in.PDOsetControlWord_SwitchOn(false);
+		eixo_in.PDOsetControlWord_EnableVoltage(true);
+		eixo_in.PDOsetControlWord_QuickStop(true);
+		eixo_in.PDOsetControlWord_EnableOperation(false);
+		eixo_in.WritePDO01();
+		
+    }
+
+}
+
+void Controle_Corrente(float accHum, float accExo, float velHum, float velExo)
+{
+	//Sincroniza a CAN
+	epos.sync();
+
+	eixo_in.ReadPDO01();
+	std::cout << eixo_in.PDOgetActualCurrent() << std::endl;
+
 }
