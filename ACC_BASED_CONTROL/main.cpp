@@ -1,29 +1,29 @@
 /*	Copyright (c) 2003-2016 Xsens Technologies B.V. or subsidiaries worldwide.
-	All rights reserved.
+All rights reserved.
 
-	Redistribution and use in source and binary forms, with or without modification,
-	are permitted provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
 
-	1.	Redistributions of source code must retain the above copyright notice,
-		this list of conditions and the following disclaimer.
+1.	Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
 
-	2.	Redistributions in binary form must reproduce the above copyright notice,
-		this list of conditions and the following disclaimer in the documentation
-		and/or other materials provided with the distribution.
+2.	Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
 
-	3.	Neither the names of the copyright holders nor the names of their contributors
-		may be used to endorse or promote products derived from this software without
-		specific prior written permission.
+3.	Neither the names of the copyright holders nor the names of their contributors
+may be used to endorse or promote products derived from this software without
+specific prior written permission.
 
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-	EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-	MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-	THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-	SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
-	OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-	HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR
-	TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@
 #include <xsensdeviceapi.h> // The Xsens device API header 
 #include <xsens/xsmutex.h>
 #include "xstypes.h"
-#include "conio.h"			// For non ANSI _kbhit() and _getch()
+#include <conio.h>
 
 
 
@@ -71,7 +71,7 @@ std::ostream& operator << (std::ostream& out, XsPortInfo const & p)
 	out << "Port: " << std::setw(2) << std::right << p.portNumber() << " (" << p.portName().toStdString() << ") @ "
 		<< std::setw(7) << p.baudrate() << " Bd"
 		<< ", " << "ID: " << p.deviceId().toString().toStdString()
-	;
+		;
 	return out;
 }
 
@@ -95,9 +95,9 @@ int main(int argc, char** argv)
 	epos.StartPDOS(3);
 	epos.StartPDOS(4);
 	epos.StartPDOS(5);
-    epos.StartPDOS(1);
-    epos.StartPDOS(2);
-    epos.StartPDOS(3);
+	epos.StartPDOS(1);
+	epos.StartPDOS(2);
+	epos.StartPDOS(3);
 	epos.StartPDOS(4);
 	epos.StartPDOS(5);
 
@@ -111,10 +111,10 @@ int main(int argc, char** argv)
 		while (clock() < endwait)
 		{
 		}
-	
+
 		//Sincroniza as epos
 		epos.sync();
-	
+
 		eixo_out.ReadPDO01();
 		eixo_in.ReadPDO01();
 
@@ -172,7 +172,7 @@ int main(int argc, char** argv)
 
 	// ---------------------------------------------  Xsens Awinda Station management  ---------------------------------------------- //
 
-	
+
 	/*
 
 	| MTw  | desiredUpdateRate (max) |
@@ -186,7 +186,7 @@ int main(int argc, char** argv)
 
 	*/
 
-    const int desiredUpdateRate = 120;						// Use 120 Hz update rate for MTw, 150 Hz usually crashes!
+	const int desiredUpdateRate = 120;						// Use 120 Hz update rate for MTw, 150 Hz usually crashes!
 	const int desiredRadioChannel = 25;						// Use radio channel 25 for wireless master.
 
 	WirelessMasterCallback wirelessMasterCallback;			// Callback for wireless master
@@ -301,7 +301,7 @@ int main(int argc, char** argv)
 				size_t nextCount = wirelessMasterCallback.getWirelessMTWs().size();
 				if (nextCount != connectedMTWCount)
 				{
-					std::cout << "Number of connected MTWs: " << nextCount << ". Press 'y' to start measurement or 'q' to quit" << std::endl;
+					std::cout << "Number of connected MTWs: " << nextCount << ". Press 'y' to start measurement or 'q' to quit \n";
 					connectedMTWCount = nextCount;
 				}
 				else
@@ -311,10 +311,10 @@ int main(int argc, char** argv)
 			}
 			if (_kbhit())
 			{
-				char keyp = (char)_getch();
-				if (keyp == 'y')
+				char keypressed = _getch();
+				if ('y' == keypressed)
 					waitForConnections = false;
-				if (keyp == 'q')
+				if ('q' == keypressed)
 				{
 					quitOnMTw = true;
 					waitForConnections = false;
@@ -373,43 +373,16 @@ int main(int argc, char** argv)
 		std::vector<XsVector> accData(mtwCallbacks.size());
 		std::vector<XsVector> gyroData(mtwCallbacks.size());
 
-		// Xsens MTw stops here to EPOS controller use the MTw data ...
-
-		std::cout << "MTw data available, do you want to continue? (y/n)" << std::endl;
-		bool cancel_control = false;
-
-		do
-		{
-			if (_kbhit())
-			{
-				char keyp = (char)_getch();
-				if (keyp == 'y')
-					break;
-				if (keyp == 'n')
-				{
-					cancel_control = true;
-					break;
-				}
-			}
-		} while(true);
-
-		if (cancel_control)
-		{
-			wirelessMasterDevice->gotoConfig();
-			wirelessMasterDevice->disableRadio();
-			throw std::runtime_error("quit by user request");
-		}
-
 		//Sincroniza as epos
 		epos.sync();
 
 		endwait = clock () + 1 * CLOCKS_PER_SEC ;
 		while (clock() < endwait) {}
 
-	
+
 		//Habilita o controle de corrente nos servomotores
 		eixo_in.VCS_SetOperationMode(CURRENT_MODE);
-				
+
 		eixo_out.ReadPDO01();
 		eixo_in.ReadPDO01();
 
@@ -500,84 +473,85 @@ int main(int argc, char** argv)
 	while (clock() < endwait) {}
 
 	std::cout << "Successful exit." << std::endl;
-	std::cout << "Press [ENTER] to continue." << std::endl; std::cin.get();
+	std::cout << "Press [ENTER] to continue." << std::endl; 
+	std::cin.get();
 
 	return 0;
 }
 
 
 
- /* EPOS FUNCTIONS */
+/* EPOS FUNCTIONS */
 
 void Habilita_Eixo(int ID)
 {
-	
-    if ((ID==2) | (ID==0))
-	{
-        
-        eixo_in.PDOsetControlWord_SwitchOn(false);
-		eixo_in.PDOsetControlWord_EnableVoltage(true);
-		eixo_in.PDOsetControlWord_QuickStop(true);
-		eixo_in.PDOsetControlWord_EnableOperation(false);
-		eixo_in.WritePDO01();
-        
-		printf("\nENERGIZANDO O MOTOR 2 E HABILITANDO O CONTROLE");
-        
-		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
-		while (clock() < endwait) {}
-        
-		eixo_in.PDOsetControlWord_SwitchOn(true);
-		eixo_in.PDOsetControlWord_EnableVoltage(true);
-		eixo_in.PDOsetControlWord_QuickStop(true);
-		eixo_in.PDOsetControlWord_EnableOperation(false);
-		eixo_in.WritePDO01();
-		
-		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
-		while (clock() < endwait) {}
-        
-		eixo_in.PDOsetControlWord_SwitchOn(true);
-		eixo_in.PDOsetControlWord_EnableVoltage(true);
-		eixo_in.PDOsetControlWord_QuickStop(true);
-		eixo_in.PDOsetControlWord_EnableOperation(true);
-		eixo_in.WritePDO01();
-    
-    }
-    
-}
 
-
-void Desabilita_Eixo(int ID)
-{
- 
-    if ((ID==2) | (ID==0))
+	if ((ID==2) | (ID==0))
 	{
-		printf("\nDESABILITANDO O MOTOR E CONTROLE");
-        
-		eixo_in.PDOsetControlWord_SwitchOn(true);
-		eixo_in.PDOsetControlWord_EnableVoltage(true);
-		eixo_in.PDOsetControlWord_QuickStop(true);
-		eixo_in.PDOsetControlWord_EnableOperation(false);
-		eixo_in.WritePDO01();
-        
-		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
-		while (clock() < endwait) {}
-        
+
 		eixo_in.PDOsetControlWord_SwitchOn(false);
 		eixo_in.PDOsetControlWord_EnableVoltage(true);
 		eixo_in.PDOsetControlWord_QuickStop(true);
 		eixo_in.PDOsetControlWord_EnableOperation(false);
 		eixo_in.WritePDO01();
-		
-    }
+
+		printf("\nENERGIZANDO O MOTOR 2 E HABILITANDO O CONTROLE");
+
+		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
+		while (clock() < endwait) {}
+
+		eixo_in.PDOsetControlWord_SwitchOn(true);
+		eixo_in.PDOsetControlWord_EnableVoltage(true);
+		eixo_in.PDOsetControlWord_QuickStop(true);
+		eixo_in.PDOsetControlWord_EnableOperation(false);
+		eixo_in.WritePDO01();
+
+		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
+		while (clock() < endwait) {}
+
+		eixo_in.PDOsetControlWord_SwitchOn(true);
+		eixo_in.PDOsetControlWord_EnableVoltage(true);
+		eixo_in.PDOsetControlWord_QuickStop(true);
+		eixo_in.PDOsetControlWord_EnableOperation(true);
+		eixo_in.WritePDO01();
+
+	}
+
+}
+
+
+void Desabilita_Eixo(int ID)
+{
+
+	if ((ID==2) | (ID==0))
+	{
+		printf("\nDESABILITANDO O MOTOR E CONTROLE");
+
+		eixo_in.PDOsetControlWord_SwitchOn(true);
+		eixo_in.PDOsetControlWord_EnableVoltage(true);
+		eixo_in.PDOsetControlWord_QuickStop(true);
+		eixo_in.PDOsetControlWord_EnableOperation(false);
+		eixo_in.WritePDO01();
+
+		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
+		while (clock() < endwait) {}
+
+		eixo_in.PDOsetControlWord_SwitchOn(false);
+		eixo_in.PDOsetControlWord_EnableVoltage(true);
+		eixo_in.PDOsetControlWord_QuickStop(true);
+		eixo_in.PDOsetControlWord_EnableOperation(false);
+		eixo_in.WritePDO01();
+
+	}
 
 }
 
 void Controle_Corrente(float accHum, float accExo, float velHum, float velExo)
 {
 	//Sincroniza a CAN
-	epos.sync();
+	//epos.sync();
 
 	eixo_in.ReadPDO01();
-	std::cout << eixo_in.PDOgetActualCurrent() << std::endl;
+	std::cout << eixo_in.PDOgetActualCurrent() << "\n";
 
 }
