@@ -97,7 +97,7 @@ public:
 		}
 	}
 
-	//Método de leitura de um frame
+	//Método de escrita de um frame
 	void write(u8 payload[8], int payload_len)
 	{
 

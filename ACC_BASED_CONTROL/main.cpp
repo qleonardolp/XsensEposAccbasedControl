@@ -55,6 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xsens/xsmutex.h>
 #include "xstypes.h"
 #include <conio.h>
+#include <math.h>
 
 
 
@@ -414,10 +415,10 @@ int main(int argc, char** argv)
 			if (newDataAvailable)
 			{
 				Controle_Corrente(
-					(float) accData[0].value(0), 
-					(float) accData[1].value(0), 
-					(float) gyroData[0].value(0), 
-					(float) gyroData[1].value(0));
+					(float) accData[0].value(1), 
+					(float) accData[1].value(1), 
+					(float) gyroData[0].value(2), 
+					(float) gyroData[1].value(2));
 			}
 		}
 		(void)_getch();
@@ -551,7 +552,23 @@ void Controle_Corrente(float accHum, float accExo, float velHum, float velExo)
 	//Sincroniza a CAN
 	epos.sync();
 
-	eixo_in.ReadPDO01();
-  std::cout << eixo_in.PDOgetActualCurrent() << "  " << eixo_in.PDOgetActualPosition() << "\n";
+	/*
+	Torque Constant: 0.0603 N.m/A
+	Speed Constant: 158 rpm/V
 
+	Max current (@ 48 V)  ~3.1 A
+	Stall current (@ 48 V)  42.4 A
+	*/
+
+	//eixo_in.ReadPDO01();
+	//std::cout << eixo_in.PDOgetActualCurrent() << "  " << eixo_in.PDOgetActualPosition() << "\n";
+
+	int setpoint = (1/TORQUE_CONST) * ( INERTIA_EXO*accHum + KP*(1/0.250)*(accHum - accExo) + KI*(velHum - velExo) );
+	//int setpoint_filt = setpoint_filt - LPF_SMF*( setpoint_filt - setpoint );
+
+	if (abs(setpoint) <= CURRENT_MAX)
+	{
+		eixo_in.PDOsetCurrentSetpoint(setpoint);	// esse argumento é em A, mA, uA ????? ...
+	}
+	eixo_in.WritePDO01();
 }
