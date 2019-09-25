@@ -563,16 +563,17 @@ void Controle_Corrente(float accHum, float accExo, float velHum, float velExo)
 	//eixo_in.ReadPDO01();
 	//std::cout << eixo_in.PDOgetActualCurrent() << "  " << eixo_in.PDOgetActualPosition() << "\n";
 
-  int setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*accHum + KP*(1/0.250)*(accHum - accExo) + KI*(velHum - velExo) );
+  float setpoint = 500000 * (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*accHum + KP*(1/0.250)*(accHum - accExo) + KI*(velHum - velExo) );
 	//int setpoint_filt = setpoint_filt - LPF_SMF*( setpoint_filt - setpoint );
+  printf("setpoint: %8.4f", setpoint);
 
   if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
 	{
-		eixo_in.PDOsetCurrentSetpoint(setpoint);	// esse argumento é em mA
+		eixo_in.PDOsetCurrentSetpoint( (int)setpoint );	// esse argumento é em mA
 	}
 	eixo_in.WritePDO01();
 
   eixo_in.ReadPDO01();
-  printf("Current: %5d [mA]  Encoder: %5d\n", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
+  printf(" current: %5d [mA]  Encoder: %5d\n", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
 
 }
