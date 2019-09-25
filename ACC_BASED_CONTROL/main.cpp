@@ -553,7 +553,7 @@ void Controle_Corrente(float accHum, float accExo, float velHum, float velExo)
 	epos.sync();
 
 	/*
-	Torque Constant: 0.0603 N.m/A
+	Torque Constant: 0.0603 N.m/A = 60.3 N.m/mA
 	Speed Constant: 158 rpm/V
 
 	Max current (@ 48 V)  ~3.1 A
@@ -563,12 +563,16 @@ void Controle_Corrente(float accHum, float accExo, float velHum, float velExo)
 	//eixo_in.ReadPDO01();
 	//std::cout << eixo_in.PDOgetActualCurrent() << "  " << eixo_in.PDOgetActualPosition() << "\n";
 
-	int setpoint = (1/TORQUE_CONST) * ( INERTIA_EXO*accHum + KP*(1/0.250)*(accHum - accExo) + KI*(velHum - velExo) );
+  int setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*accHum + KP*(1/0.250)*(accHum - accExo) + KI*(velHum - velExo) );
 	//int setpoint_filt = setpoint_filt - LPF_SMF*( setpoint_filt - setpoint );
 
-	if (abs(setpoint) <= CURRENT_MAX)
+  if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
 	{
-		eixo_in.PDOsetCurrentSetpoint(setpoint);	// esse argumento é em A, mA, uA ????? ...
+		eixo_in.PDOsetCurrentSetpoint(setpoint);	// esse argumento é em mA
 	}
 	eixo_in.WritePDO01();
+
+  eixo_in.ReadPDO01();
+  printf("Current: %5d [mA]  Encoder: %5d\n", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
+
 }
