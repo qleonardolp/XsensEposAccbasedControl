@@ -95,7 +95,7 @@ public:
 		setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*acc_hum + KP*(acc_hum - acc_exo) + KI*(vel_hum - vel_exo) );
 		setpoint = 600000 * setpoint;
 
-		printf("setpoint: %8.4f", setpoint);
+		printf("setpoint: %7.3f", setpoint);
 
 		if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
 		{
@@ -487,6 +487,7 @@ int main(int argc, char** argv)
 				if (mtwCallbacks[i]->dataAvailable())
 				{
 					mtw_data_stamp = std::chrono::high_resolution_clock::now();
+
 					newDataAvailable = true;
 					XsDataPacket const * packet = mtwCallbacks[i]->getOldestPacket();
 
@@ -506,8 +507,8 @@ int main(int argc, char** argv)
 											 (float) gyroData[1].value(2));
 
 				auto control_stamp = std::chrono::high_resolution_clock::now();
-				float delay = std::chrono::duration_cast<std::chrono::microseconds>(control_stamp - mtw_data_stamp).count();
-				printf("delay: %5.3f us\n", delay);
+				float delay = std::chrono::duration_cast<std::chrono::nanoseconds>(control_stamp - mtw_data_stamp).count();
+				printf("delay: %6.3f ns\n", delay);
 
 			}
 		}
