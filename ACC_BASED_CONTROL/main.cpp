@@ -63,8 +63,87 @@ void Habilita_Eixo(int ID);
 
 void Desabilita_Eixo(int ID);
 
-void Controle_Corrente(float accHum, float accExo, float velHum, float velExo);
+class accBasedControl
+{
+public:
+	accBasedControl()
+	{ 
+		vel_hum = 0;
+		vel_exo = 0;
+		vel_hum_ant = 0;
+		vel_exo_ant = 0;
+	}
+	~accBasedControl()
+	{
+		eixo_in.PDOsetCurrentSetpoint(0);
+		eixo_in.WritePDO01();
+	}
 
+	void currentControl(float accHum, float accExo, float velHum, float velExo)
+	{
+		epos.sync();	//Sincroniza a CAN
+
+		vel_hum = vel_hum - LPF_SMF*( vel_hum - velHum);
+		acc_hum = (vel_hum - vel_hum_ant)*RATE;
+		vel_hum_ant = vel_hum;
+
+		vel_exo = vel_exo- LPF_SMF*( vel_exo - velExo);
+		acc_exo = (vel_exo - vel_exo_ant)*RATE;
+		vel_exo_ant = vel_exo;
+
+		setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*acc_hum + KP*(acc_hum - acc_exo) + KI*(vel_hum - vel_exo) );
+		setpoint = 1000000 * setpoint;
+
+		printf("setpoint: %8.4f", setpoint);
+
+		if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
+		{
+			eixo_in.PDOsetCurrentSetpoint( (int)setpoint );	// esse argumento é em mA
+		}
+		eixo_in.WritePDO01();
+
+		eixo_in.ReadPDO01();
+		printf(" current: %5d [mA]  Encoder: %5d\n", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
+	}
+private:
+	float acc_hum;			// [rad/s^2]
+	float acc_exo;			// [rad/s^2]
+
+	float vel_hum;			// [rad/s]
+	float vel_exo;			// [rad/s]
+	float vel_hum_ant;		// [rad/s]
+	float vel_exo_ant;		// [rad/s]
+
+	float setpoint;			// [mA]
+};
+
+/*
+void Control_Corrente(float accHum, float accExo, float velHum, float velExo)
+{
+	//Sincroniza a CAN
+	epos.sync();
+
+		//	Torque Constant: 0.0603 N.m/A = 60.3 N.m/mA
+		//	Speed Constant: 158 rpm/V
+		//	Max current (@ 48 V)  ~3.1 A
+		//	Stall current (@ 48 V)  42.4 A
+
+	float setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*accHum + KP*(1/0.250)*(accHum - accExo) + KI*(velHum - velExo) );
+	setpoint = 1000000 * setpoint;
+
+	printf("setpoint: %8.4f", setpoint);
+
+	if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
+	{
+		eixo_in.PDOsetCurrentSetpoint( (int)setpoint );	// esse argumento é em mA
+	}
+	eixo_in.WritePDO01();
+
+	eixo_in.ReadPDO01();
+	printf(" current: %5d [mA]  Encoder: %5d\n", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
+
+}
+*/
 
 /*! \brief Stream insertion operator overload for XsPortInfo */
 std::ostream& operator << (std::ostream& out, XsPortInfo const & p)
@@ -391,6 +470,8 @@ int main(int argc, char** argv)
 
 		// Função de Controle (loop MTw + Controle) ...
 
+		accBasedControl xsens2Eposcan;
+
 		std::cout << "Loop de Controle, pressione qualquer tecla para interromper!" << std::endl;
 
 		while (!_kbhit())
@@ -414,14 +495,14 @@ int main(int argc, char** argv)
 
 			if (newDataAvailable)
 			{
-				Controle_Corrente(
-					(float) accData[0].value(1), 
-					(float) accData[1].value(1), 
-					(float) gyroData[0].value(2), 
-					(float) gyroData[1].value(2));
+				//Controle_Corrente( (float) accData[0].value(1), (float) accData[1].value(1), (float) gyroData[0].value(2), (float) gyroData[1].value(2));
+
+				xsens2Eposcan.currentControl((float) accData[0].value(1), (float) accData[1].value(1), (float) gyroData[0].value(2), (float) gyroData[1].value(2));
 			}
 		}
 		(void)_getch();
+
+		xsens2Eposcan.~accBasedControl();
 
 		//Zera o comando do motor
 		eixo_in.PDOsetCurrentSetpoint(0);
@@ -547,33 +628,3 @@ void Desabilita_Eixo(int ID)
 
 }
 
-void Controle_Corrente(float accHum, float accExo, float velHum, float velExo)
-{
-	//Sincroniza a CAN
-	epos.sync();
-
-	/*
-	Torque Constant: 0.0603 N.m/A = 60.3 N.m/mA
-	Speed Constant: 158 rpm/V
-
-	Max current (@ 48 V)  ~3.1 A
-	Stall current (@ 48 V)  42.4 A
-	*/
-
-	//eixo_in.ReadPDO01();
-	//std::cout << eixo_in.PDOgetActualCurrent() << "  " << eixo_in.PDOgetActualPosition() << "\n";
-
-  float setpoint = 500000 * (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*accHum + KP*(1/0.250)*(accHum - accExo) + KI*(velHum - velExo) );
-	//int setpoint_filt = setpoint_filt - LPF_SMF*( setpoint_filt - setpoint );
-  printf("setpoint: %8.4f", setpoint);
-
-  if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
-	{
-		eixo_in.PDOsetCurrentSetpoint( (int)setpoint );	// esse argumento é em mA
-	}
-	eixo_in.WritePDO01();
-
-  eixo_in.ReadPDO01();
-  printf(" current: %5d [mA]  Encoder: %5d\n", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
-
-}
