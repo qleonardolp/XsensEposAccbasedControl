@@ -92,7 +92,7 @@ public:
 		vel_exo_ant = vel_exo;
 
 		setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*acc_hum + KP*(acc_hum - acc_exo) + KI*(vel_hum - vel_exo) );
-		setpoint = 1000000 * setpoint;
+		setpoint = 600000 * setpoint;
 
 		printf("setpoint: %8.4f", setpoint);
 
@@ -103,7 +103,7 @@ public:
 		eixo_in.WritePDO01();
 
 		eixo_in.ReadPDO01();
-		printf(" current: %5d [mA]  Encoder: %5d\n", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
+    printf(" current: %5d [mA]  Encoder: %5d\n", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
 	}
 private:
 	float acc_hum;			// [rad/s^2]
