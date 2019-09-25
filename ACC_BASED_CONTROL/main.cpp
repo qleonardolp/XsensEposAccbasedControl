@@ -56,6 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xstypes.h"
 #include <conio.h>
 #include <math.h>
+#include <chrono>
 
 
 
@@ -103,7 +104,7 @@ public:
 		eixo_in.WritePDO01();
 
 		eixo_in.ReadPDO01();
-    printf(" current: %5d [mA]  Encoder: %5d\n", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
+    printf(" current: %5d [mA]  Encoder: %5d  ", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
 	}
 private:
 	float acc_hum;			// [rad/s^2]
@@ -479,10 +480,13 @@ int main(int argc, char** argv)
 			XsTime::msleep(0);
 
 			bool newDataAvailable = false;
+			std::chrono::high_resolution_clock::time_point mtw_data_stamp;
+
 			for (size_t i = 0; i < mtwCallbacks.size(); ++i)
 			{
 				if (mtwCallbacks[i]->dataAvailable())
 				{
+					mtw_data_stamp = std::chrono::high_resolution_clock::now();
 					newDataAvailable = true;
 					XsDataPacket const * packet = mtwCallbacks[i]->getOldestPacket();
 
@@ -495,9 +499,16 @@ int main(int argc, char** argv)
 
 			if (newDataAvailable)
 			{
-				//Controle_Corrente( (float) accData[0].value(1), (float) accData[1].value(1), (float) gyroData[0].value(2), (float) gyroData[1].value(2));
 
-				xsens2Eposcan.currentControl((float) accData[0].value(1), (float) accData[1].value(1), (float) gyroData[0].value(2), (float) gyroData[1].value(2));
+				xsens2Eposcan.currentControl((float) accData[0].value(1), 
+											 (float) accData[1].value(1), 
+											 (float) gyroData[0].value(2), 
+											 (float) gyroData[1].value(2));
+
+				auto control_stamp = std::chrono::high_resolution_clock::now();
+				float delay = std::chrono::duration_cast<std::chrono::microseconds>(control_stamp - mtw_data_stamp).count();
+				printf("delay: %5.3f us\n", delay);
+
 			}
 		}
 		(void)_getch();
