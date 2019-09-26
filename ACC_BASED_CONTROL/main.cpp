@@ -98,7 +98,7 @@ public:
 		setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*acc_hum + KP*(acc_hum - acc_exo) + KI*(vel_hum - vel_exo) );
 		setpoint = 600000 * setpoint;
 
-		printf("setpoint: %7.3f", setpoint);
+    //printf("setpoint: %7.3f", setpoint);
 
 		if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
 		{
@@ -113,7 +113,7 @@ public:
 		theta_c = ( (eixo_in.PDOgetActualPosition()-pos0_in )*2*MY_PI) / (ENCODER_IN * GEAR_RATIO);
 		torque_sea = STIFFNESS * (theta_c - theta_l);
 
-		printf("m_i: %5d mA  eixo de saida: %5.3f °	coroa: %5.3f °	T_sea: %5.3f N.m", eixo_in.PDOgetActualCurrent(), theta_l * (180/MY_PI), theta_c * (180/MY_PI), torque_sea);
+		printf(" %5d mA theta_l: %5.3f deg theta_c: %5.3f deg T_sea: %5.3f N.m ", eixo_in.PDOgetActualCurrent(), theta_l * (180/MY_PI), theta_c * (180/MY_PI), torque_sea);
 	}
 private:
 	float acc_hum;			// [rad/s^2]
@@ -525,8 +525,8 @@ int main(int argc, char** argv)
 											 (float) gyroData[1].value(2));
 
 				auto control_stamp = std::chrono::high_resolution_clock::now();
-				float delay = std::chrono::duration_cast<std::chrono::nanoseconds>(control_stamp - mtw_data_stamp).count();
-				printf("delay: %6.3f ns\n", delay);
+				float delay = std::chrono::duration_cast<std::chrono::microseconds>(control_stamp - mtw_data_stamp).count();
+				printf("%.2f us\n", delay);   // printing the delay
 
 			}
 		}
