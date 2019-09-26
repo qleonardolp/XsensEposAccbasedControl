@@ -6,7 +6,7 @@
 #define		  GEAR_RATIO		  150.0		    // Redução do Sistema
 #define		  ENCODER_IN		  4096		    // Resolução do encoder do motor
 #define		  ENCODER_OUT		  2048		    // Resolução do encoder de saída
-#define		  STIFFNESS			  104.0			// Constante da mola SEA [N.m/rad ?]
+#define		  STIFFNESS			  104.0			// Constante da mola SEA [N.m/rad]
 #define		  SAMPLE_TIME		  0.005		    // Tempo de Amostragem [s]
 
 #define		  CURRENT_MAX		  3.1000		// Max corrente nominal no motor Maxon RE40 [A]
@@ -15,8 +15,15 @@
 
 #define     GRAVITY         9.8066      // [m/s^2]
 #define     INERTIA_EXO     0.0655      // [Kg.m^2], +- 0.0006, estimado em 2019-08-21
-#define     KP              0.0060      // [Kg.m^2]
-#define     KI              0.6920      // [Kg.m^2/s]
+
+// Feedback PI acc-based controller:
+#define     KP_A			0.0060      // [Kg.m^2]
+#define     KI_A			0.6920      // [Kg.m^2/s]
+
+// Feedback PD force (SEA) controller:
+#define     KP_F			0.0010      // [dimensionless]
+#define     KD_F			0.1000      // [s]
+
 
 #define     RATE            120.00      // [Hz]		  ?? Ts = 0.005 -> 200 Hz ??
 #define     LPF_FC          15.000      // [Hz] Low Pass Filter Frequency Cutoff

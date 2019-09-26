@@ -73,6 +73,7 @@ public:
 		vel_exo = 0;
 		vel_hum_ant = 0;
 		vel_exo_ant = 0;
+		torque_sea = 0;
 
 		pos0_out = zero_out;
 		pos0_in = zero_in;
@@ -95,23 +96,26 @@ public:
 		acc_exo = (vel_exo - vel_exo_ant)*RATE;
 		vel_exo_ant = vel_exo;
 
-		setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*acc_hum + KP*(acc_hum - acc_exo) + KI*(vel_hum - vel_exo) );
-		setpoint = 600000 * setpoint;
+		eixo_out.ReadPDO01();
+		theta_l = ( (float) (-eixo_out.PDOgetActualPosition()- pos0_out)/ENCODER_OUT )*2*MY_PI;				// [rad]
 
-    //printf("setpoint: %7.3f", setpoint);
+		eixo_in.ReadPDO01();
+		theta_c = ( (float) (eixo_in.PDOgetActualPosition()-pos0_in )/(ENCODER_IN * GEAR_RATIO) )*2*MY_PI;	// [rad]
+		d_torque_sea = ( STIFFNESS*(theta_c - theta_l) - torque_sea )*RATE;
+		torque_sea = STIFFNESS * (theta_c - theta_l);
+
+		setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(vel_hum - vel_exo) ) + KP_F*torque_sea + KD_F*d_torque_sea;
+		//setpoint = 600000 * setpoint;
+
+		//printf("setpoint: %7.3f", setpoint);
+
+		epos.sync();
 
 		if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
 		{
 			eixo_in.PDOsetCurrentSetpoint( (int)setpoint );	// esse argumento é em mA
 		}
 		eixo_in.WritePDO01();
-
-		eixo_out.ReadPDO01();
-		theta_l = ( (-eixo_out.PDOgetActualPosition()- pos0_out)*2*MY_PI)/ENCODER_OUT;
-
-		eixo_in.ReadPDO01();
-		theta_c = ( (eixo_in.PDOgetActualPosition()-pos0_in )*2*MY_PI) / (ENCODER_IN * GEAR_RATIO);
-		torque_sea = STIFFNESS * (theta_c - theta_l);
 
 		printf(" %5d mA theta_l: %5.3f deg theta_c: %5.3f deg T_sea: %5.3f N.m ", eixo_in.PDOgetActualCurrent(), theta_l * (180/MY_PI), theta_c * (180/MY_PI), torque_sea);
 	}
@@ -126,9 +130,10 @@ private:
 
 	float setpoint;			// [mA]
 
-	float theta_l;
-	float theta_c;
-	float torque_sea;
+	float theta_l;			// [rad]
+	float theta_c;			// [rad]
+	float torque_sea;		// [N.m]
+	float d_torque_sea;		// [N.m/s]
 	int pos0_out;
 	int pos0_in;
 	
