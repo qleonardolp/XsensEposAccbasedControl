@@ -104,10 +104,12 @@ public:
 		d_torque_sea = ( STIFFNESS*(theta_c - theta_l) - torque_sea )*RATE;
 		torque_sea = STIFFNESS * (theta_c - theta_l);
 
-		setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(vel_hum - vel_exo) ) + KP_F*torque_sea + KD_F*d_torque_sea;
+		grav_comp = INERTIA_EXO*GRAVITY*L_CG*sin(theta_l);
+
+		setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(vel_hum - vel_exo) + KP_F*torque_sea + KD_F*d_torque_sea );
 		//setpoint = 600000 * setpoint;
 
-		//printf("setpoint: %7.3f", setpoint);
+		printf("setpt: %7.3f", setpoint);
 
 		epos.sync();
 
@@ -117,7 +119,7 @@ public:
 		}
 		eixo_in.WritePDO01();
 
-		printf(" %5d mA theta_l: %5.3f deg theta_c: %5.3f deg T_sea: %5.3f N.m ", eixo_in.PDOgetActualCurrent(), theta_l * (180/MY_PI), theta_c * (180/MY_PI), torque_sea);
+		printf(" %5d mA theta_l: %5.3f deg theta_c: %5.3f deg T_sea: %5.3f N.m T_grav: %5.3f N.m", eixo_in.PDOgetActualCurrent(), theta_l * (180/MY_PI), theta_c * (180/MY_PI), torque_sea, grav_comp);
 	}
 private:
 	float acc_hum;			// [rad/s^2]
@@ -134,6 +136,7 @@ private:
 	float theta_c;			// [rad]
 	float torque_sea;		// [N.m]
 	float d_torque_sea;		// [N.m/s]
+	float grav_comp;		// [N.m]
 	int pos0_out;
 	int pos0_in;
 	

@@ -15,6 +15,7 @@
 
 #define     GRAVITY         9.8066      // [m/s^2]
 #define     INERTIA_EXO     0.0655      // [Kg.m^2], +- 0.0006, estimado em 2019-08-21
+#define		L_CG			0.3500		// [m]
 
 // Feedback PI acc-based controller:
 #define     KP_A			0.0060      // [Kg.m^2]
