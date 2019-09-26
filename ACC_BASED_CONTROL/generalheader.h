@@ -6,7 +6,7 @@
 #define		  GEAR_RATIO		  150.0		    // Redução do Sistema
 #define		  ENCODER_IN		  4096		    // Resolução do encoder do motor
 #define		  ENCODER_OUT		  2048		    // Resolução do encoder de saída
-#define		  STIFFNESS			  104.0			// Constante da mola SEA [???]
+#define		  STIFFNESS			  104.0			// Constante da mola SEA [N.m/rad ?]
 #define		  SAMPLE_TIME		  0.005		    // Tempo de Amostragem [s]
 
 #define		  CURRENT_MAX		  3.1000		// Max corrente nominal no motor Maxon RE40 [A]

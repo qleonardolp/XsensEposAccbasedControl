@@ -67,12 +67,15 @@ void Desabilita_Eixo(int ID);
 class accBasedControl
 {
 public:
-	accBasedControl()
+	accBasedControl(int zero_out, int zero_in)
 	{ 
 		vel_hum = 0;
 		vel_exo = 0;
 		vel_hum_ant = 0;
 		vel_exo_ant = 0;
+
+		pos0_out = zero_out;
+		pos0_in = zero_in;
 	}
 	~accBasedControl()
 	{
@@ -103,8 +106,14 @@ public:
 		}
 		eixo_in.WritePDO01();
 
+		eixo_out.ReadPDO01();
+		theta_l = ( (-eixo_out.PDOgetActualPosition()- pos0_out)*2*MY_PI)/ENCODER_OUT;
+
 		eixo_in.ReadPDO01();
-    printf(" current: %5d [mA]  Encoder: %5d  ", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
+		theta_c = ( (eixo_in.PDOgetActualPosition()-pos0_in )*2*MY_PI) / (ENCODER_IN * GEAR_RATIO);
+		torque_sea = STIFFNESS * (theta_c - theta_l);
+
+		printf("m_i: %5d mA  eixo de saida: %5.3f °	coroa: %5.3f °	T_sea: %5.3f N.m", eixo_in.PDOgetActualCurrent(), theta_l * (180/MY_PI), theta_c * (180/MY_PI), torque_sea);
 	}
 private:
 	float acc_hum;			// [rad/s^2]
@@ -116,6 +125,13 @@ private:
 	float vel_exo_ant;		// [rad/s]
 
 	float setpoint;			// [mA]
+
+	float theta_l;
+	float theta_c;
+	float torque_sea;
+	int pos0_out;
+	int pos0_in;
+	
 };
 
 /*
@@ -470,8 +486,10 @@ int main(int argc, char** argv)
 		Habilita_Eixo(2);
 
 		// Função de Controle (loop MTw + Controle) ...
-
-		accBasedControl xsens2Eposcan;
+		epos.sync();
+		eixo_out.ReadPDO01();
+		eixo_in.ReadPDO01();
+		accBasedControl xsens2Eposcan(-eixo_out.PDOgetActualPosition(), eixo_in.PDOgetActualPosition());
 
 		std::cout << "Loop de Controle, pressione qualquer tecla para interromper!" << std::endl;
 
