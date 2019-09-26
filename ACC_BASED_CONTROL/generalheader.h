@@ -10,7 +10,7 @@
 #define		  SAMPLE_TIME		  0.005		    // Tempo de Amostragem [s]
 
 #define		  CURRENT_MAX		  3.1000		// Max corrente nominal no motor Maxon RE40 [A]
-#define		  TORQUE_CONST		  60.300		// Constante de torque do motor RE40	[N.m/mA]
+#define		  TORQUE_CONST		60.300		// Constante de torque do motor RE40	[N.m/mA]
 
 
 #define     GRAVITY         9.8066      // [m/s^2]
@@ -22,8 +22,8 @@
 #define     KI_A			0.6920      // [Kg.m^2/s]
 
 // Feedback PD force (SEA) controller:
-#define     KP_F			0.0010      // [dimensionless]
-#define     KD_F			0.1000      // [s]
+#define     KP_F			0.5000      // [dimensionless]
+#define     KD_F			0.0500      // [s]
 
 
 #define     RATE            120.00      // [Hz]		  ?? Ts = 0.005 -> 200 Hz ??
