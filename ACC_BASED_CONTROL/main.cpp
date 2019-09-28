@@ -104,11 +104,11 @@ public:
 		d_torque_sea = ( STIFFNESS*(theta_c - theta_l) - torque_sea )*RATE;
 		torque_sea = STIFFNESS * (theta_c - theta_l);
 
-		grav_comp = (INERTIA_EXO + 0.038)*GRAVITY*(0.50)*sin(theta_l);
-    accbased_comp = INERTIA_EXO*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(vel_hum - vel_exo);
+		//grav_comp = (INERTIA_EXO + 0.038)*GRAVITY*(0.50)*sin(theta_l);
+    accbased_comp = (5 * INERTIA_EXO)*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(vel_hum - vel_exo);
 
-    setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( accbased_comp + KP_F*torque_sea + KD_F*d_torque_sea );
-    setpoint = 700000 * setpoint;
+    setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( accbased_comp - KP_F*torque_sea - KD_F*d_torque_sea );
+    setpoint = 60000 * setpoint;
 
 		printf("setpt: %7.3f", setpoint);
 
@@ -119,7 +119,7 @@ public:
 		eixo_in.WritePDO01();
 
     eixo_in.ReadPDO01();
-    printf(" %5d mA theta_l: %5.3f deg theta_c: %5.3f deg T_sea: %5.3f N.m T_grav: %5.3f N.m T_acc: %-5.3f N.m ", eixo_in.PDOgetActualCurrent(), theta_l * (180/MY_PI), theta_c * (180/MY_PI), torque_sea, grav_comp, accbased_comp);
+    printf(" %5d mA theta_l: %5.3f deg theta_c: %5.3f deg T_sea: %5.3f N.m T_acc: %-5.3f N.m \n", eixo_in.PDOgetActualCurrent(), theta_l * (180/MY_PI), theta_c * (180/MY_PI), torque_sea, accbased_comp);
 	}
 private:
 	float acc_hum;			// [rad/s^2]
@@ -535,7 +535,7 @@ int main(int argc, char** argv)
 
 				auto control_stamp = std::chrono::high_resolution_clock::now();
 				float delay = std::chrono::duration_cast<std::chrono::microseconds>(control_stamp - mtw_data_stamp).count();
-				printf("%.2f us\n", delay);   // printing the delay
+				//printf("%.2f us\n", delay);   // printing the delay
 
 			}
 		}

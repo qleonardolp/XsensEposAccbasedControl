@@ -18,12 +18,12 @@
 #define		L_CG			0.3500		// [m]
 
 // Feedback PI acc-based controller:
-#define     KP_A			0.0060      // [Kg.m^2]
-#define     KI_A			0.6920      // [Kg.m^2/s]
+#define     KP_A			2.1205      // [Kg.m^2]
+#define     KI_A			1.4069      // [Kg.m^2/s]
 
 // Feedback PD force (SEA) controller:
-#define     KP_F			0.5000      // [dimensionless]
-#define     KD_F			0.0500      // [s]
+#define     KP_F			13.131      // [dimensionless]
+#define     KD_F			2.4846      // [s]
 
 
 #define     RATE            120.00      // [Hz]		  ?? Ts = 0.005 -> 200 Hz ??
