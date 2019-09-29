@@ -46,6 +46,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AXIS.h"
 #include "EPOS_NETWORK.h"
 #include "generalheader.h"
+#include "currentController.h"
+
 
 #include "findClosestUpdateRate.h"
 #include "mastercallback.h"
@@ -58,12 +60,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <math.h>
 #include <chrono>
 
-
-
 void Habilita_Eixo(int ID);
 
 void Desabilita_Eixo(int ID);
 
+/*
 class accBasedControl
 {
 public:
@@ -136,39 +137,12 @@ private:
 	float theta_c;			  // [rad]
 	float torque_sea;		  // [N.m]
 	float d_torque_sea;	  // [N.m/s]
-  float accbased_comp;  // [N.m]
+	float accbased_comp;  // [N.m]
 	float grav_comp;		  // [N.m]
 	int pos0_out;
 	int pos0_in;
 	
 };
-
-/*
-void Control_Corrente(float accHum, float accExo, float velHum, float velExo)
-{
-	//Sincroniza a CAN
-	epos.sync();
-
-		//	Torque Constant: 0.0603 N.m/A = 60.3 N.m/mA
-		//	Speed Constant: 158 rpm/V
-		//	Max current (@ 48 V)  ~3.1 A
-		//	Stall current (@ 48 V)  42.4 A
-
-	float setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( INERTIA_EXO*accHum + KP*(1/0.250)*(accHum - accExo) + KI*(velHum - velExo) );
-	setpoint = 1000000 * setpoint;
-
-	printf("setpoint: %8.4f", setpoint);
-
-	if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
-	{
-		eixo_in.PDOsetCurrentSetpoint( (int)setpoint );	// esse argumento é em mA
-	}
-	eixo_in.WritePDO01();
-
-	eixo_in.ReadPDO01();
-	printf(" current: %5d [mA]  Encoder: %5d\n", eixo_in.PDOgetActualCurrent(), eixo_in.PDOgetActualPosition());
-
-}
 */
 
 /*! \brief Stream insertion operator overload for XsPortInfo */
@@ -498,7 +472,8 @@ int main(int argc, char** argv)
 		epos.sync();
 		eixo_out.ReadPDO01();
 		eixo_in.ReadPDO01();
-		accBasedControl xsens2Eposcan(-eixo_out.PDOgetActualPosition(), eixo_in.PDOgetActualPosition());
+		accBasedControl xsens2Eposcan(&epos, &eixo_in, &eixo_out);
+		//accBasedControl xsens2Eposcan(-eixo_out.PDOgetActualPosition(), eixo_in.PDOgetActualPosition());
 
 		std::cout << "Loop de Controle, pressione qualquer tecla para interromper!" << std::endl;
 
@@ -527,11 +502,8 @@ int main(int argc, char** argv)
 
 			if (newDataAvailable)
 			{
-
-				xsens2Eposcan.currentControl((float) accData[0].value(1), 
-											 (float) accData[1].value(1), 
-											 (float) gyroData[0].value(2), 
-											 (float) gyroData[1].value(2));
+				xsens2Eposcan.FiniteDiff((float) gyroData[0].value(2), 
+									     (float) gyroData[1].value(2));
 
 				auto control_stamp = std::chrono::high_resolution_clock::now();
 				float delay = std::chrono::duration_cast<std::chrono::microseconds>(control_stamp - mtw_data_stamp).count();
