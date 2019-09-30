@@ -502,8 +502,9 @@ int main(int argc, char** argv)
 
 			if (newDataAvailable)
 			{
-				xsens2Eposcan.FiniteDiff((float) gyroData[0].value(2), 
-									     (float) gyroData[1].value(2));
+				xsens2Eposcan.FiniteDiff((float) gyroData[0].value(2), (float) gyroData[1].value(2));
+
+        //xsens2Eposcan.Acc_Gravity((float) accData[0].value(0), (float) accData[0].value(1), (float) accData[1].value(0), (float) accData[1].value(1), (float) gyroData[0].value(2), (float) gyroData[1].value(2));
 
 				auto control_stamp = std::chrono::high_resolution_clock::now();
 				float delay = std::chrono::duration_cast<std::chrono::microseconds>(control_stamp - mtw_data_stamp).count();
@@ -515,7 +516,7 @@ int main(int argc, char** argv)
 
 		xsens2Eposcan.~accBasedControl();
 
-		//Zera o comando do motor
+		//Zera o comando do motor, apesar do destrutor acima já fazer isso
 		eixo_in.PDOsetCurrentSetpoint(0);
 		eixo_in.WritePDO01();
 

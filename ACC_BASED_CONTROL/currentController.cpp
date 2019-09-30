@@ -24,16 +24,23 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 	torque_sea = STIFFNESS * (theta_c - theta_l);
 
 	//grav_comp = (INERTIA_EXO + 0.038)*GRAVITY*(0.50)*sin(theta_l);
-    accbased_comp = (5 * INERTIA_EXO)*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(vel_hum - vel_exo);
+    accbased_comp = (4 * INERTIA_EXO)*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(vel_hum - vel_exo);
 
-    setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( accbased_comp - KP_F*torque_sea - KD_F*d_torque_sea );
-    setpoint = 60000 * setpoint;
+    setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( 120000*accbased_comp + 30000*(KP_F*torque_sea + KD_F*d_torque_sea) ); // 
+    //setpoint = 80000 * setpoint;
 
 	printf("setpt: %7.3f", setpoint);
 
 	if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
 	{
-		m_eixo_in->PDOsetCurrentSetpoint( (int)setpoint );	// esse argumento é em mA
+    if ((theta_c >= - 0.52359) && (theta_c <= 0.52359))
+    {
+       m_eixo_in->PDOsetCurrentSetpoint( (int)setpoint );	// esse argumento é em mA
+    }
+    else
+    {
+      m_eixo_in->PDOsetCurrentSetpoint( 0 );
+    }
 	}
 	m_eixo_in->WritePDO01();
 
@@ -58,7 +65,7 @@ void accBasedControl::Acc_Gravity(float accHum_X, float accHum_Y, float accExo_X
 		acc_hum = ( accHum_Y + GRAVITY*sqrt(1 - sin_thetag) ) / MTW_DIST_LIMB;
 	}
 
-	accbased_comp = (5 * INERTIA_EXO)*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(velHum_Z - velExo_Z);
+	accbased_comp = (INERTIA_EXO)*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(velHum_Z - velExo_Z);
 
 
 	m_eixo_out->ReadPDO01();
@@ -69,14 +76,22 @@ void accBasedControl::Acc_Gravity(float accHum_X, float accHum_Y, float accExo_X
 	d_torque_sea = ( STIFFNESS*(theta_c - theta_l) - torque_sea )*RATE;
 	torque_sea = STIFFNESS * (theta_c - theta_l);
 
-	setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( accbased_comp - KP_F*torque_sea - KD_F*d_torque_sea );
+  // NOT WORKING
+	setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( 10000 * accbased_comp );// - KP_F*torque_sea - KD_F*d_torque_sea );
 	setpoint_filt = setpoint_filt - LPF_SMF*( setpoint_filt - setpoint);
 
 	printf("setpt: %7.3f", setpoint);
 
 	if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
 	{
-		m_eixo_in->PDOsetCurrentSetpoint( (int)setpoint );	// esse argumento é em mA
+    if ((theta_c >= - 0.52359) && (theta_c <= 0.52359))
+    {
+       m_eixo_in->PDOsetCurrentSetpoint( (int)setpoint );	// esse argumento é em mA
+    }
+    else
+    {
+      m_eixo_in->PDOsetCurrentSetpoint( 0 );
+    }
 	}
 	m_eixo_in->WritePDO01();
 
