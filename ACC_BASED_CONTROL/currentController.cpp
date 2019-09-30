@@ -26,8 +26,8 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 	//grav_comp = (INERTIA_EXO + 0.038)*GRAVITY*(0.50)*sin(theta_l);
     accbased_comp = (4 * INERTIA_EXO)*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(vel_hum - vel_exo);
 
-    setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( 120000*accbased_comp + 30000*(KP_F*torque_sea + KD_F*d_torque_sea) ); // 
-    //setpoint = 80000 * setpoint;
+    setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( accbased_comp + KP_F*torque_sea + KD_F*d_torque_sea ); // 
+    setpoint = 75000 * setpoint;
 
 	printf("setpt: %7.3f", setpoint);
 
