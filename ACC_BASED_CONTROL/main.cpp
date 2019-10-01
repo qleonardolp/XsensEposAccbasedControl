@@ -41,8 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <list>
 #include <set>
 
-//#include <thread>
-
 #include "AXIS.h"
 #include "EPOS_NETWORK.h"
 #include "generalheader.h"
@@ -59,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <conio.h>
 #include <math.h>
 #include <time.h>
+#include <thread>
 #include <chrono>
 
 void Habilita_Eixo(int ID);
@@ -369,6 +368,20 @@ int main(int argc, char** argv)
 			mtwCallbacks[i] = new MtwCallback(i, mtwDevices[i]);
 			mtwDevices[i]->addCallbackHandler(mtwCallbacks[i]);
 		}
+
+    for (int i = 0; i < (int)mtwDevices.size(); ++i)
+		{
+      if (i == 0)
+      {
+        std::cout << "MTw Hum: " << mtwDevices[i]->deviceId().toString().toStdString();
+      }
+      if (i == 1)
+      {
+        std::cout << " MTw Exo: " << mtwDevices[i]->deviceId().toString().toStdString() << std::endl;
+      }
+		}
+
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
 		std::vector<XsVector> accData(mtwCallbacks.size());
 		std::vector<XsVector> gyroData(mtwCallbacks.size());
