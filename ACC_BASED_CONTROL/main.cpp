@@ -58,92 +58,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xstypes.h"
 #include <conio.h>
 #include <math.h>
+#include <time.h>
 #include <chrono>
 
 void Habilita_Eixo(int ID);
 
 void Desabilita_Eixo(int ID);
 
-/*
-class accBasedControl
-{
-public:
-	accBasedControl(int zero_out, int zero_in)
-	{ 
-		vel_hum = 0;
-		vel_exo = 0;
-		vel_hum_ant = 0;
-		vel_exo_ant = 0;
-		torque_sea = 0;
-
-		pos0_out = zero_out;
-		pos0_in = zero_in;
-	}
-	~accBasedControl()
-	{
-		eixo_in.PDOsetCurrentSetpoint(0);
-		eixo_in.WritePDO01();
-	}
-
-	void currentControl(float accHum, float accExo, float velHum, float velExo)
-	{
-		epos.sync();	//Sincroniza a CAN
-
-		vel_hum = vel_hum - LPF_SMF*( vel_hum - velHum);
-		acc_hum = (vel_hum - vel_hum_ant)*RATE;
-		vel_hum_ant = vel_hum;
-
-		vel_exo = vel_exo- LPF_SMF*( vel_exo - velExo);
-		acc_exo = (vel_exo - vel_exo_ant)*RATE;
-		vel_exo_ant = vel_exo;
-
-		eixo_out.ReadPDO01();
-		theta_l = ( (float) (-eixo_out.PDOgetActualPosition()- pos0_out)/ENCODER_OUT )*2*MY_PI;				// [rad]
-
-		eixo_in.ReadPDO01();
-		theta_c = ( (float) (eixo_in.PDOgetActualPosition()-pos0_in )/(ENCODER_IN * GEAR_RATIO) )*2*MY_PI;	// [rad]
-		d_torque_sea = ( STIFFNESS*(theta_c - theta_l) - torque_sea )*RATE;
-		torque_sea = STIFFNESS * (theta_c - theta_l);
-
-		//grav_comp = (INERTIA_EXO + 0.038)*GRAVITY*(0.50)*sin(theta_l);
-    accbased_comp = (5 * INERTIA_EXO)*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(vel_hum - vel_exo);
-
-    setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( accbased_comp - KP_F*torque_sea - KD_F*d_torque_sea );
-    setpoint = 60000 * setpoint;
-
-		printf("setpt: %7.3f", setpoint);
-
-		if ( (setpoint >= - CURRENT_MAX*1000) && (setpoint <= CURRENT_MAX*1000) )
-		{
-			eixo_in.PDOsetCurrentSetpoint( (int)setpoint );	// esse argumento é em mA
-		}
-		eixo_in.WritePDO01();
-
-    eixo_in.ReadPDO01();
-    printf(" %5d mA theta_l: %5.3f deg theta_c: %5.3f deg T_sea: %5.3f N.m T_acc: %-5.3f N.m \n", eixo_in.PDOgetActualCurrent(), theta_l * (180/MY_PI), theta_c * (180/MY_PI), torque_sea, accbased_comp);
-	}
-private:
-	float acc_hum;			// [rad/s^2]
-	float acc_exo;			// [rad/s^2]
-
-	float vel_hum;			// [rad/s]
-	float vel_exo;			// [rad/s]
-	float vel_hum_ant;		// [rad/s]
-	float vel_exo_ant;		// [rad/s]
-
-	float setpoint;			// [mA]
-
-	float theta_l;			  // [rad]
-	float theta_c;			  // [rad]
-	float torque_sea;		  // [N.m]
-	float d_torque_sea;	  // [N.m/s]
-	float accbased_comp;  // [N.m]
-	float grav_comp;		  // [N.m]
-	int pos0_out;
-	int pos0_in;
-	
-};
-*/
 
 /*! \brief Stream insertion operator overload for XsPortInfo */
 std::ostream& operator << (std::ostream& out, XsPortInfo const & p)
@@ -256,7 +177,7 @@ int main(int argc, char** argv)
 	/*
 
 	| MTw  | desiredUpdateRate (max) |
-	|------|-------------------------|
+	|------|------------------------|
 	|  1   |           150 Hz        |
 	|  2   |           120 Hz        |
 	|  4   |           100 Hz        |
@@ -277,7 +198,6 @@ int main(int argc, char** argv)
 	if (control == 0)
 	{
 		std::cout << "Failed to construct XsControl instance." << std::endl;
-		//return -1;
 	}
 
 	try
@@ -473,22 +393,27 @@ int main(int argc, char** argv)
 		eixo_out.ReadPDO01();
 		eixo_in.ReadPDO01();
 		accBasedControl xsens2Eposcan(&epos, &eixo_in, &eixo_out);
-		//accBasedControl xsens2Eposcan(-eixo_out.PDOgetActualPosition(), eixo_in.PDOgetActualPosition());
 
 		std::cout << "Loop de Controle, pressione qualquer tecla para interromper!" << std::endl;
+
+    clock_t beginning = 0;
+    clock_t loop_duration;
+    float freq;
 
 		while (!_kbhit())
 		{
 			XsTime::msleep(0);
 
 			bool newDataAvailable = false;
-			std::chrono::high_resolution_clock::time_point mtw_data_stamp;
+      std::chrono::system_clock::time_point mtw_data_stamp;
+      //clock_t begin;
 
 			for (size_t i = 0; i < mtwCallbacks.size(); ++i)
 			{
 				if (mtwCallbacks[i]->dataAvailable())
 				{
-					mtw_data_stamp = std::chrono::high_resolution_clock::now();
+          mtw_data_stamp = std::chrono::steady_clock::now();
+          //begin = clock();
 
 					newDataAvailable = true;
 					XsDataPacket const * packet = mtwCallbacks[i]->getOldestPacket();
@@ -506,19 +431,23 @@ int main(int argc, char** argv)
 
         //xsens2Eposcan.Acc_Gravity((float) accData[0].value(0), (float) accData[0].value(1), (float) accData[1].value(0), (float) accData[1].value(1), (float) gyroData[0].value(2), (float) gyroData[1].value(2));
 
-				auto control_stamp = std::chrono::high_resolution_clock::now();
-				float delay = std::chrono::duration_cast<std::chrono::microseconds>(control_stamp - mtw_data_stamp).count();
-				//printf("%.2f us\n", delay);   // printing the delay
+				auto control_stamp = std::chrono::steady_clock::now();
+				float delay = std::chrono::duration_cast<std::chrono::milliseconds>(control_stamp - mtw_data_stamp).count();
+        printf("%.3f us\n", delay);
 
+        //clock_t end = clock();
+        //double delay = (double) (end - begin)/CLOCKS_PER_SEC;
+				//printf("%f s\n", delay);   // printing the delay
+
+        //loop_duration = clock() - beginning;
+        //beginning = clock();
+        //freq = (float) CLOCKS_PER_SEC / loop_duration;
+        //printf("%.2f Hz\n", freq);
 			}
 		}
 		(void)_getch();
 
-		xsens2Eposcan.~accBasedControl();
-
-		//Zera o comando do motor, apesar do destrutor acima já fazer isso
-		eixo_in.PDOsetCurrentSetpoint(0);
-		eixo_in.WritePDO01();
+		xsens2Eposcan.~accBasedControl(); //Zera o comando do motor
 
 		//Desabilita o Eixo
 		Desabilita_Eixo(0);
@@ -619,7 +548,7 @@ void Desabilita_Eixo(int ID)
 
 	if ((ID==2) | (ID==0))
 	{
-		printf("\nDESABILITANDO O MOTOR E CONTROLE");
+		printf("\nDESABILITANDO O MOTOR E CONTROLE\n\n");
 
 		eixo_in.PDOsetControlWord_SwitchOn(true);
 		eixo_in.PDOsetControlWord_EnableVoltage(true);
