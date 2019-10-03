@@ -8,7 +8,6 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 {
 	m_epos->sync();	//Sincroniza a CAN
 
-	/*
 	vel_hum = vel_hum - LPF_SMF*( vel_hum - velHum);
 	acc_hum = (vel_hum - vel_hum_ant)*RATE;
 	vel_hum_ant = vel_hum;
@@ -16,13 +15,6 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 	vel_exo = vel_exo- LPF_SMF*( vel_exo - velExo);
 	acc_exo = (vel_exo - vel_exo_ant)*RATE;
 	vel_exo_ant = vel_exo;
-	*/
-
-	acc_hum = (velHum - vel_hum)*RATE;
-	vel_hum = velHum;
-
-	acc_exo = (velExo - vel_exo)*RATE;
-	vel_exo = velExo;
 
 	m_eixo_out->ReadPDO01();
 	theta_l = ( (float) (-m_eixo_out->PDOgetActualPosition()- pos0_out)/ENCODER_OUT )*2*MY_PI;				// [rad]
@@ -33,10 +25,11 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 	torque_sea = STIFFNESS * (theta_c - theta_l);
 
 	//grav_comp = (INERTIA_EXO + 0.038)*GRAVITY*(0.50)*sin(theta_l);
-    accbased_comp = (4 * INERTIA_EXO)*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(vel_hum - vel_exo);
+    accbased_comp = (4 * INERTIA_EXO)*acc_hum + KP_A*(acc_hum - acc_exo) + KI_A*(vel_hum - vel_exo); // curiously -KP_A works very well 
 
     setpoint = (1/TORQUE_CONST) * (1/GEAR_RATIO) * ( accbased_comp + KP_F*torque_sea + KD_F*d_torque_sea ); // 
-    setpoint = 75000 * setpoint;
+    //setpoint = 75000 * setpoint;
+    setpoint = 300000 * setpoint;
 
 	setpoint_filt = setpoint_filt - LPF_SMF*( setpoint_filt - setpoint);
 
