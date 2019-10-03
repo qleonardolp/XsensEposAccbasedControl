@@ -1,4 +1,5 @@
 #include "currentController.h"
+#include <stdio.h>
 #include <math.h>
 
 // Control Functions Descriptions //
@@ -39,7 +40,7 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 
 	setpoint_filt = setpoint_filt - LPF_SMF*( setpoint_filt - setpoint);
 
-	printf("setpt: %7.3f", setpoint_filt);
+	//printf("setpt: %7.3f", setpoint_filt);
 
 	if ( (setpoint_filt >= - CURRENT_MAX*1000) && (setpoint_filt <= CURRENT_MAX*1000) )
 	{
@@ -55,7 +56,9 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 	m_eixo_in->WritePDO01();
 
     m_eixo_in->ReadPDO01();
-    printf(" %5d mA theta_l: %5.3f deg theta_c: %5.3f deg T_sea: %5.3f N.m T_acc: %-5.3f N.m \n", m_eixo_in->PDOgetActualCurrent(), theta_l * (180/MY_PI), theta_c * (180/MY_PI), torque_sea, accbased_comp);
+    int actualCurrent = m_eixo_in->PDOgetActualCurrent();
+
+    ctrl_word = " setpt: " + std::to_string(setpoint_filt) + " [" + std::to_string(actualCurrent) + " mA]\n theta_l: " + std::to_string(theta_l * (180/MY_PI)) + " deg theta_c: " + std::to_string(theta_c * (180/MY_PI)) + " deg\n T_sea: " + std::to_string(torque_sea) + " N.m T_acc: " + std::to_string(accbased_comp) + " N.m\n";
 }
 
 

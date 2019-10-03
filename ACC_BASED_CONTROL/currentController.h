@@ -77,6 +77,8 @@ public:
 		m_eixo_in->WritePDO01();
 	}
 
+  std::string ctrl_word;
+
 private:
 
 	EPOS_NETWORK* m_epos;
