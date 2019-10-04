@@ -37,7 +37,7 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 
 	if ( (setpoint_filt >= - CURRENT_MAX*1000) && (setpoint_filt <= CURRENT_MAX*1000) )
 	{
-    if ((theta_l >= - 1.39626) && (theta_l <= 0.17453)) // -80 deg <= theta_l (perna) <= 10 deg //
+    if ((theta_l >= - 0.29670) && (theta_l <= 0.69813)) // -80 deg <= theta_l (perna) <= 10 deg // - 1.39626 theta_l 0.17453
     {
        m_eixo_in->PDOsetCurrentSetpoint( (int)setpoint_filt );	// esse argumento é em mA !!!
     }
