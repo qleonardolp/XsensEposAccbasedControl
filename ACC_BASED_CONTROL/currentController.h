@@ -27,7 +27,8 @@
 #define		MTW_DIST_EXO	0.0700		// [m]
 #define		L_CG			0.3500		// [m]
 
-// Feedback PI acc-based controller:
+// Feedforward-Feedback PI acc-based controller:
+#define		K_FF			1.0000		// [dimensionless]
 #define     KP_A			4.5600      // [Kg.m^2]
 #define     KI_A			5.7900      // [Kg.m^2/s]
 
@@ -48,10 +49,12 @@ public:
 	// constructor
 	accBasedControl(EPOS_NETWORK* epos, AXIS* eixo_in, AXIS* eixo_out)
 	{
+	K_ff = K_FF;
     Kp_A = KP_A;
     Ki_A = KI_A;
     Kp_F = KP_F;
     Kd_F = KD_F;
+	Amplifier = 100000; // initialized with a safe value
     
     vel_hum =		0;
 		vel_exo =		0;
@@ -95,10 +98,12 @@ private:
 	AXIS* m_eixo_out;
 
   FILE* gains_values;
+  float K_ff;
   float Kp_A;
   float Ki_A;
   float Kp_F;
   float Kd_F;
+  int Amplifier;
 
 	float acc_hum;			// [rad/s^2]
 	float acc_exo;			// [rad/s^2]
