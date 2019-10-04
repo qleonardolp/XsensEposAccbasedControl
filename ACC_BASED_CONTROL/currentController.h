@@ -28,12 +28,12 @@
 #define		L_CG			0.3500		// [m]
 
 // Feedback PI acc-based controller:
-#define     KP_A			0.8500      // [Kg.m^2]
-#define     KI_A			0.1960      // [Kg.m^2/s]
+#define     KP_A			4.5600      // [Kg.m^2]
+#define     KI_A			5.7900      // [Kg.m^2/s]
 
 // Feedback PD force (SEA) controller:
-#define     KP_F			0.0410      // [dimensionless]
-#define     KD_F			0.0076      // [s]
+#define     KP_F			1.5310      // [dimensionless]
+#define     KD_F			0.0200      // [s]
 
 
 #define     RATE            120.00      // [Hz]		  ?? Ts = 0.005 -> 200 Hz ??
@@ -48,11 +48,18 @@ public:
 	// constructor
 	accBasedControl(EPOS_NETWORK* epos, AXIS* eixo_in, AXIS* eixo_out)
 	{
-		vel_hum =		0;
+    Kp_A = KP_A;
+    Ki_A = KI_A;
+    Kp_F = KP_F;
+    Kd_F = KD_F;
+    
+    vel_hum =		0;
 		vel_exo =		0;
 		vel_hum_ant =	0;
 		vel_exo_ant =	0;
+
 		torque_sea =	0;
+    torque_sea_ant = 0;
 		setpoint =		0;
 		setpoint_filt = 0;
 
@@ -70,6 +77,8 @@ public:
 	// acc-gravity
 	void Acc_Gravity(float accHum_X, float accHum_Y, float accExo_X, float accExo_Y, float velHum_Z, float velExo_Z);
 
+  void Gains_Scan();
+
 	// destructor
 	~accBasedControl()
 	{
@@ -85,6 +94,12 @@ private:
 	AXIS* m_eixo_in;
 	AXIS* m_eixo_out;
 
+  FILE* gains_values;
+  float Kp_A;
+  float Ki_A;
+  float Kp_F;
+  float Kd_F;
+
 	float acc_hum;			// [rad/s^2]
 	float acc_exo;			// [rad/s^2]
 
@@ -98,10 +113,13 @@ private:
 
 	float theta_l;			// [rad]
 	float theta_c;			// [rad]
+
 	float torque_sea;		// [N.m]
+  float torque_sea_ant;
 	float d_torque_sea;		// [N.m/s]
 	float accbased_comp;	// [N.m]
 	float grav_comp;		// [N.m]
+
 	int pos0_out;
 	int pos0_in;
 };

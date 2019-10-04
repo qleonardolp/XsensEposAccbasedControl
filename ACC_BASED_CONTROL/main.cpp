@@ -410,7 +410,8 @@ int main(int argc, char** argv)
 		std::cout << "Loop de Controle, pressione qualquer tecla para interromper!" << std::endl;
 
     float delay;
-    int k = 0;
+    int printer = 0;
+    int scan_file = 0;
 
     clock_t beginning = 0;
     clock_t loop_duration;
@@ -444,7 +445,8 @@ int main(int argc, char** argv)
 			if (newDataAvailable)
 			{
 				xsens2Eposcan.FiniteDiff((float) gyroData[0].value(2), (float) gyroData[1].value(2));
-        k++;
+        printer++;
+        scan_file++;
         //xsens2Eposcan.Acc_Gravity((float) accData[0].value(0), (float) accData[0].value(1), (float) accData[1].value(0), (float) accData[1].value(1), (float) gyroData[0].value(2), (float) gyroData[1].value(2));
 
 				auto control_stamp = std::chrono::steady_clock::now();
@@ -459,14 +461,22 @@ int main(int argc, char** argv)
         //freq = (float) CLOCKS_PER_SEC / loop_duration;
         //printf("%.2f Hz\n", freq);
 			}
-      if (k == desiredUpdateRate / 4)   // 120
+
+      if (printer == desiredUpdateRate / 4)   // 120
       {
         system("cls");
         std::cout << xsens2Eposcan.ctrl_word;
         printf(" delay %.3f us\n", delay);
 
-        k = 0;
+        printer = 0;
       }
+
+      if ( scan_file == desiredUpdateRate*15 )  // every 15s reads the gains_values.txt 
+      {
+        xsens2Eposcan.Gains_Scan();
+        scan_file = 0;
+      }
+
 		}
 		(void)_getch();
 
