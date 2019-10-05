@@ -49,12 +49,13 @@ public:
 	// constructor
 	accBasedControl(EPOS_NETWORK* epos, AXIS* eixo_in, AXIS* eixo_out)
 	{
-	K_ff = K_FF;
+    
+    K_ff = K_FF;
     Kp_A = KP_A;
     Ki_A = KI_A;
     Kp_F = KP_F;
     Kd_F = KD_F;
-	Amplifier = 100000; // initialized with a safe value
+	  Amplifier = 100000; // initialized with a safe value
     
     vel_hum =		0;
 		vel_exo =		0;

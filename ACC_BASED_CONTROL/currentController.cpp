@@ -37,7 +37,7 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 
 	if ( (setpoint_filt >= - CURRENT_MAX*1000) && (setpoint_filt <= CURRENT_MAX*1000) )
 	{
-    if ((theta_l >= - 0.29670) && (theta_l <= 0.69813)) // -80 deg <= theta_l (perna) <= 10 deg // - 1.39626 theta_l 0.17453
+    if ((theta_l >= - 0.43633) && (theta_l <= 1.13446)) // -80 deg <= theta_l (perna) <= 10 deg // - 1.39626 theta_l 0.17453
     {
        m_eixo_in->PDOsetCurrentSetpoint( (int)setpoint_filt );	// esse argumento é em mA !!!
     }
@@ -51,6 +51,34 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
     m_eixo_in->ReadPDO01();
     int actualCurrent = m_eixo_in->PDOgetActualCurrent();
 
+    char numbers_str[20];
+
+    sprintf(numbers_str, "%+5.3f", setpoint_filt);
+    ctrl_word = " setpt: " + (std::string) numbers_str;
+    sprintf(numbers_str, "%+5d", actualCurrent);
+    ctrl_word += " [" + (std::string) numbers_str + " mA]\n";
+    sprintf(numbers_str, "%+5.3f", theta_l * (180/MY_PI));
+    ctrl_word += " theta_l: " + (std::string) numbers_str + " deg";
+    sprintf(numbers_str, "%+5.3f", theta_c * (180/MY_PI));
+    ctrl_word += " theta_c: " + (std::string) numbers_str + " deg\n";
+    sprintf(numbers_str, "%+5.3f", torque_sea);
+    ctrl_word += " T_sea: " + (std::string) numbers_str + " N.m";
+    sprintf(numbers_str, "%+5.3f", accbased_comp);
+    ctrl_word += " T_acc: " + (std::string) numbers_str + " N.m\n";
+    sprintf(numbers_str, "%6.4f", K_ff);
+    ctrl_word += " K_ff: " + (std::string) numbers_str;
+    sprintf(numbers_str, "%6.4f", Kp_A);
+    ctrl_word += " Kp_A: " + (std::string) numbers_str;
+    sprintf(numbers_str, "%6.4f", Ki_A);
+    ctrl_word += " Ki_A: " + (std::string) numbers_str + "\n";
+    sprintf(numbers_str, "%6.4f", Kp_F);
+    ctrl_word += " Kp_F: " + (std::string) numbers_str;
+    sprintf(numbers_str, "%6.4f", Kd_F);
+    ctrl_word += " Kd_F: " + (std::string) numbers_str + "\n";
+    sprintf(numbers_str, "%5d", Amplifier);
+    ctrl_word += " Amp: " + (std::string) numbers_str + "\n";
+    
+    /*
     ctrl_word = " setpt: " + std::to_string(setpoint_filt) +
                 " [" + std::to_string(actualCurrent) + " mA]\n" + 
                 " theta_l: " + std::to_string(theta_l * (180/MY_PI)) + " deg" + 
@@ -58,11 +86,12 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
                 " T_sea: " + std::to_string(torque_sea) + " N.m" + 
                 " T_acc: " + std::to_string(accbased_comp) + " N.m\n" +
                 " K_ff: " + std::to_string(K_ff) +
-				" Kp_A: " + std::to_string(Kp_A) +
+				        " Kp_A: " + std::to_string(Kp_A) +
                 " Ki_A: " + std::to_string(Ki_A) + "\n" + 
                 " Kp_F: " + std::to_string(Kp_F) + 
                 " Kd_F: " + std::to_string(Kd_F) + "\n" +
-				" Amp: " + std::to_string(Amplifier) + "\n";
+				        " Amp: " + std::to_string(Amplifier) + "\n";
+    */   
 }
 
 

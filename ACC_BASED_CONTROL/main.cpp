@@ -423,14 +423,12 @@ int main(int argc, char** argv)
 
 			bool newDataAvailable = false;
       std::chrono::system_clock::time_point mtw_data_stamp;
-      //clock_t begin;
 
 			for (size_t i = 0; i < mtwCallbacks.size(); ++i)
 			{
 				if (mtwCallbacks[i]->dataAvailable())
 				{
           mtw_data_stamp = std::chrono::steady_clock::now();
-          //begin = clock();
 
 					newDataAvailable = true;
 					XsDataPacket const * packet = mtwCallbacks[i]->getOldestPacket();
@@ -456,17 +454,16 @@ int main(int argc, char** argv)
         //double delay = (double) (end - begin)/CLOCKS_PER_SEC;
 				//printf("%f s\n", delay);   // printing the delay
 
-        //loop_duration = clock() - beginning;
-        //beginning = clock();
-        //freq = (float) CLOCKS_PER_SEC / loop_duration;
-        //printf("%.2f Hz\n", freq);
+        loop_duration = clock() - beginning;
+        beginning = clock();
+        freq = (float) CLOCKS_PER_SEC / loop_duration;
 			}
 
-      if (printer == desiredUpdateRate / 4)   // 120
+      if (printer == desiredUpdateRate / 5)   // 120
       {
         system("cls");
         std::cout << xsens2Eposcan.ctrl_word;
-        printf(" delay %5.2f us\n", delay);
+        printf(" delay %4.2f us rate: %5.2f Hz\n", delay, freq);
         printer = 0;
       }
 
@@ -475,7 +472,6 @@ int main(int argc, char** argv)
         xsens2Eposcan.Gains_Scan();
         scan_file = 0;
       }
-
 		}
 		(void)_getch();
 
