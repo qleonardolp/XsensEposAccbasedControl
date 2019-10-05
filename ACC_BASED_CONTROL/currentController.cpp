@@ -37,7 +37,7 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 
 	if ( (setpoint_filt >= - CURRENT_MAX*1000) && (setpoint_filt <= CURRENT_MAX*1000) )
 	{
-    if ((theta_l >= - 0.1200) && (theta_l <= 1.4800)) // (sentado)
+    if ((theta_l >= - 0.5200) && (theta_l <= 1.4800)) // (sentado)
     //if ((theta_l >= - 1.10000) && (theta_l <= 0.60000)) //(caminhando)
     {
        m_eixo_in->PDOsetCurrentSetpoint( (int)setpoint_filt );	// esse argumento é em mA !!!
@@ -47,6 +47,10 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
       m_eixo_in->PDOsetCurrentSetpoint( 0 );
     }
 	}
+  else
+  {
+    m_eixo_in->PDOsetCurrentSetpoint( 0 );
+  }
 	m_eixo_in->WritePDO01();
 
     m_eixo_in->ReadPDO01();
@@ -77,22 +81,7 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
     sprintf(numbers_str, "%6.4f", Kd_F);
     ctrl_word += " Kd_F: " + (std::string) numbers_str + "\n";
     sprintf(numbers_str, "%5d", Amplifier);
-    ctrl_word += " Amp: " + (std::string) numbers_str + "\n";
-    
-    /*
-    ctrl_word = " setpt: " + std::to_string(setpoint_filt) +
-                " [" + std::to_string(actualCurrent) + " mA]\n" + 
-                " theta_l: " + std::to_string(theta_l * (180/MY_PI)) + " deg" + 
-                " theta_c: " + std::to_string(theta_c * (180/MY_PI)) + " deg\n" + 
-                " T_sea: " + std::to_string(torque_sea) + " N.m" + 
-                " T_acc: " + std::to_string(accbased_comp) + " N.m\n" +
-                " K_ff: " + std::to_string(K_ff) +
-				        " Kp_A: " + std::to_string(Kp_A) +
-                " Ki_A: " + std::to_string(Ki_A) + "\n" + 
-                " Kp_F: " + std::to_string(Kp_F) + 
-                " Kd_F: " + std::to_string(Kd_F) + "\n" +
-				        " Amp: " + std::to_string(Amplifier) + "\n";
-    */   
+    ctrl_word += " Amp: " + (std::string) numbers_str + "\n";  
 }
 
 

@@ -1,7 +1,7 @@
 #ifndef GENERAL_HEADER_H
 #define GENERAL_HEADER_H
 
-#define		  SAMPLE_TIME		  0.005		    // Tempo de Amostragem [s]
+#define		  SAMPLE_TIME		  0.0083333		    // Tempo de Amostragem [s]
 
 // ENDEREÇAMENTO DA BASE DE DADOS CAN
 
@@ -11,11 +11,10 @@ char* CAN_CLUSTER =		  "NETCAN";
 char* NET_ID_SERVO_01 =		   "1";
 char* NET_ID_SERVO_02 =		   "2";
 
-//INICIALIZANDO O QUERY PERFORMANCE PARA CONTROLE DOS CICLOS DE 5MS
+//INICIALIZANDO O QUERY PERFORMANCE PARA CONTROLE DOS CICLOS DE 8.333 MS
 
 LARGE_INTEGER tick_after, tick_before, TICKS_PER_SECOND;
 long long int ticksSampleTime, final_time;
-int total_time;
 
 //INICIALIZAÇÃO DA REDE CAN
 

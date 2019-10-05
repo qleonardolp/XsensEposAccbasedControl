@@ -123,9 +123,6 @@ int main(int argc, char** argv)
 
 	std::cout << "Resetando Falhas " << std::endl;
 
-	//ZERA CONTADOR DE CICLOS
-	total_time = 0;
-
 	//EPOS 01
 	eixo_out.PDOsetControlWord_FaultReset(true);
 	eixo_out.WritePDO01();
@@ -419,7 +416,9 @@ int main(int argc, char** argv)
 
 		while (!_kbhit())
 		{
-			XsTime::msleep(0);
+			XsTime::msleep(5);
+      //QueryPerformanceCounter(&tick_before);
+			//final_time = tick_before.QuadPart + 1*ticksSampleTime;
 
 			bool newDataAvailable = false;
       std::chrono::system_clock::time_point mtw_data_stamp;
@@ -472,6 +471,9 @@ int main(int argc, char** argv)
         xsens2Eposcan.Gains_Scan();
         scan_file = 0;
       }
+
+      //QueryPerformanceCounter(&tick_after);
+			//while (final_time > tick_after.QuadPart) QueryPerformanceCounter(&tick_after);
 		}
 		(void)_getch();
 
