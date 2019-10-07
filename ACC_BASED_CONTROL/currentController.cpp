@@ -37,8 +37,9 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 
 	if ((setpoint_filt >= -CURRENT_MAX * 1000) && (setpoint_filt <= CURRENT_MAX * 1000))
 	{
-		if ((theta_l >= -0.5200) && (theta_l <= 1.4800)) // (sentado)
-	  //if ((theta_l >= - 1.10000) && (theta_l <= 0.60000)) //(caminhando)
+		//if ((theta_l >= -0.5200) && (theta_l <= 1.4800)) // (sentado)
+	  if ((theta_l >= - 1.30899) && (theta_l <= 0.26179)) //(caminhando)
+    //if ((theta_l >= - 1.39626) && (theta_l <= 0.17000)) //(em pe parado)
 		{
 			m_eixo_in->PDOsetCurrentSetpoint((int)setpoint_filt);	// esse argumento é em mA !!!
 		}
@@ -81,7 +82,11 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 	sprintf(numbers_str, "%6.4f", Kd_F);
 	ctrl_word += " Kd_F: " + (std::string) numbers_str + "\n";
 	sprintf(numbers_str, "%5d", Amplifier);
-	ctrl_word += " Amp: " + (std::string) numbers_str + "\n";
+	ctrl_word += " Amplifier: " + (std::string) numbers_str + "\n";
+
+  m_eixo_in->ReadPDO02();
+  sprintf(numbers_str, "%+5d", m_eixo_in->PDOgetActualVelocity());
+	ctrl_word += " Velocity: " + (std::string) numbers_str + " [???]\n";
 
 	if (logging && (log_count != 0))
 	{
@@ -89,7 +94,7 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 		logger = fopen(logger_filename, "a");
 		if (logger != NULL)
 		{
-			fprintf(logger, "%5.3f	%5d		%5.3f	%5.3f	%5.3f	%5.3f	%5.3f	%5.3f	%5.3f	%5.3f	%5.3f	%5d\n", 
+			fprintf(logger, "%5.3f  %5d   %5.3f  %5.3f  %5.3f  %5.3f  %5.3f  %5.3f  %5.3f  %5.3f  %5.3f  %5d\n", 
 			setpoint_filt, actualCurrent, theta_l * (180 / MY_PI), theta_c * (180 / MY_PI), torque_sea, accbased_comp, K_ff, Kp_A, Ki_A, Kp_F, Kd_F, Amplifier);
 			fclose(logger);
 		}
@@ -146,6 +151,10 @@ void accBasedControl::Acc_Gravity(float accHum_X, float accHum_Y, float accExo_X
 
 	m_eixo_in->ReadPDO01();
 	printf(" %5d mA theta_l: %5.3f deg theta_c: %5.3f deg T_sea: %5.3f N.m T_acc: %-5.3f N.m \n", m_eixo_in->PDOgetActualCurrent(), theta_l * (180 / MY_PI), theta_c * (180 / MY_PI), torque_sea, accbased_comp);
+}
+
+void accBasedControl::OmegaControl(float velHum, float velExo)
+{
 }
 
 void accBasedControl::Gains_Scan()

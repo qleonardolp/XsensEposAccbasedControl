@@ -89,7 +89,7 @@ public:
 			if (logger != NULL)
 			{
 				//printing the first line, the header:
-				fprintf(logger, "SetPt	[mA]	I_m		[mA]	theta_l		[deg]	theta_c		[deg]	T_sea	[N.m]	T_acc	[N.m]	K_ff	Kp_A	Ki_A	Kp_F	Kd_F	Amp\n");
+				fprintf(logger, "SetPt[mA]  I_m[mA] theta_l[deg]  theta_c[deg]  T_sea[N.m]  T_acc[N.m]  K_ff  Kp_A  Ki_A  Kp_F  Kd_F  Amp\n");
 				fclose(logger);
 			}
 		}
@@ -106,6 +106,8 @@ public:
 
 	// acc-gravity
 	void Acc_Gravity(float accHum_X, float accHum_Y, float accExo_X, float accExo_Y, float velHum_Z, float velExo_Z);
+
+  void OmegaControl(float velHum, float velExo);
 
 	void Gains_Scan();
 
