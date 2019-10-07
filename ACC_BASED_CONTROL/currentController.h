@@ -84,7 +84,7 @@ public:
 			time(&rawtime);
 			timeinfo = localtime(&rawtime);
 
-			strftime(logger_filename, 30, "%F-%H-%M-%S.txt", timeinfo);
+			strftime(logger_filename, 30, "%Y-%m-%d-%H-%M-%S.txt", timeinfo);
 			logger = fopen(logger_filename, "wt");
 			if (logger != NULL)
 			{
