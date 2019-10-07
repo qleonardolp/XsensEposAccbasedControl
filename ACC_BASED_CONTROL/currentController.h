@@ -3,7 +3,7 @@
 
 #include "AXIS.h"
 #include "EPOS_NETWORK.h"
-
+#include <time.h>
 
 // CONSTANTES
 
@@ -47,25 +47,8 @@ class accBasedControl
 {
 public:
 	// constructor
-	accBasedControl(EPOS_NETWORK* epos, AXIS* eixo_in, AXIS* eixo_out)
+	accBasedControl(EPOS_NETWORK* epos, AXIS* eixo_in, AXIS* eixo_out, int seconds)
 	{
-    
-    K_ff = K_FF;
-    Kp_A = KP_A;
-    Ki_A = KI_A;
-    Kp_F = KP_F;
-    Kd_F = KD_F;
-	  Amplifier = 100000; // initialized with a safe value
-    
-    vel_hum =		0;
-		vel_exo =		0;
-		vel_hum_ant =	0;
-		vel_exo_ant =	0;
-
-		torque_sea =	0;
-    torque_sea_ant = 0;
-		setpoint =		0;
-		setpoint_filt = 0;
 
 		m_epos = epos;
 		m_eixo_in = eixo_in;
@@ -73,6 +56,49 @@ public:
 
 		pos0_out = -m_eixo_out->PDOgetActualPosition();
 		pos0_in = m_eixo_in->PDOgetActualPosition();
+
+		K_ff = K_FF;
+		Kp_A = KP_A;
+		Ki_A = KI_A;
+		Kp_F = KP_F;
+		Kd_F = KD_F;
+		Amplifier = 100000; // initialized with a safe value
+
+		vel_hum = 0;
+		vel_exo = 0;
+		vel_hum_ant = 0;
+		vel_exo_ant = 0;
+
+		torque_sea = 0;
+		torque_sea_ant = 0;
+		setpoint = 0;
+		setpoint_filt = 0;
+
+		if (seconds != 0)
+		{
+			logging = true;
+			log_count = seconds*RATE;
+
+			time_t rawtime;
+			struct tm* timeinfo;
+			time(&rawtime);
+			timeinfo = localtime(&rawtime);
+
+			strftime(logger_filename, 30, "%F-%H-%M-%S.txt", timeinfo);
+			logger = fopen(logger_filename, "wt");
+			if (logger != NULL)
+			{
+				//printing the first line, the header:
+				fprintf(logger, "SetPt	[mA]	I_m		[mA]	theta_l		[deg]	theta_c		[deg]	T_sea	[N.m]	T_acc	[N.m]	K_ff	Kp_A	Ki_A	Kp_F	Kd_F	Amp\n");
+				fclose(logger);
+			}
+		}
+		else
+		{
+			logging = false;
+			log_count = 0;
+		}
+
 	}
 
 	// numdiff
@@ -81,7 +107,7 @@ public:
 	// acc-gravity
 	void Acc_Gravity(float accHum_X, float accHum_Y, float accExo_X, float accExo_Y, float velHum_Z, float velExo_Z);
 
-  void Gains_Scan();
+	void Gains_Scan();
 
 	// destructor
 	~accBasedControl()
@@ -90,7 +116,7 @@ public:
 		m_eixo_in->WritePDO01();
 	}
 
-  std::string ctrl_word;
+	std::string ctrl_word;
 
 private:
 
@@ -98,13 +124,18 @@ private:
 	AXIS* m_eixo_in;
 	AXIS* m_eixo_out;
 
-  FILE* gains_values;
-  float K_ff;
-  float Kp_A;
-  float Ki_A;
-  float Kp_F;
-  float Kd_F;
-  int Amplifier;
+	FILE* logger;
+	char logger_filename[30];
+	int log_count;
+	bool logging;
+
+	FILE* gains_values;
+	int Amplifier;
+	float K_ff;
+	float Kp_A;
+	float Ki_A;
+	float Kp_F;
+	float Kd_F;
 
 	float acc_hum;			// [rad/s^2]
 	float acc_exo;			// [rad/s^2]
@@ -121,7 +152,7 @@ private:
 	float theta_c;			// [rad]
 
 	float torque_sea;		// [N.m]
-  float torque_sea_ant;
+	float torque_sea_ant;
 	float d_torque_sea;		// [N.m/s]
 	float accbased_comp;	// [N.m]
 	float grav_comp;		// [N.m]

@@ -87,7 +87,7 @@ std::ostream& operator << (std::ostream& out, XsDevice const & d)
 int main(int argc, char** argv)
 {
 	QueryPerformanceFrequency(&TICKS_PER_SECOND);
-	ticksSampleTime= TICKS_PER_SECOND.QuadPart * SAMPLE_TIME;
+	ticksSampleTime = TICKS_PER_SECOND.QuadPart * SAMPLE_TIME;
 
 	//START DE TRANSMISSÃO DA REDE CAN
 	epos.StartPDOS(1);
@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 	for (int i = 0; i < 10; i++)
 	{
 		//Aguarda tempo
-		endwait = clock () + 1 * CLOCKS_PER_SEC ;
+		endwait = clock() + 1 * CLOCKS_PER_SEC;
 		while (clock() < endwait)
 		{
 		}
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
 
 	//printf("\nResetando as falhas.");
 
-	endwait = clock () + 2 * CLOCKS_PER_SEC ;
+	endwait = clock() + 2 * CLOCKS_PER_SEC;
 	while (clock() < endwait) {}
 
 	std::cout << "..";
@@ -140,7 +140,7 @@ int main(int argc, char** argv)
 
 	std::cout << "..";
 
-	endwait = clock () + 2 * CLOCKS_PER_SEC ;
+	endwait = clock() + 2 * CLOCKS_PER_SEC;
 	while (clock() < endwait) {}
 
 	printf("..");
@@ -151,7 +151,7 @@ int main(int argc, char** argv)
 
 	std::cout << "..";
 
-	endwait = clock () + 2 * CLOCKS_PER_SEC ;
+	endwait = clock() + 2 * CLOCKS_PER_SEC;
 	while (clock() < endwait) {}
 
 	std::cout << "..";
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
 
 	std::cout << "..";
 
-	endwait = clock () + 2 * CLOCKS_PER_SEC ;
+	endwait = clock() + 2 * CLOCKS_PER_SEC;
 	while (clock() < endwait) {}
 
 	std::cout << "OK" << std::endl;
@@ -316,8 +316,7 @@ int main(int argc, char** argv)
 					waitForConnections = false;
 				}
 			}
-		}
-		while (waitForConnections);
+		} while (waitForConnections);
 
 		if (quitOnMTw)
 		{
@@ -325,6 +324,10 @@ int main(int argc, char** argv)
 			wirelessMasterDevice->disableRadio();
 			throw std::runtime_error("quit by user request");
 		}
+
+		int time_logging;
+		printf("How long (sec) do you want to record this run? 0 to do not record.");
+		scanf("%d", &time_logging);
 
 		std::cout << "Starting measurement..." << std::endl;
 		if (!wirelessMasterDevice->gotoMeasurement())
@@ -366,19 +369,19 @@ int main(int argc, char** argv)
 			mtwDevices[i]->addCallbackHandler(mtwCallbacks[i]);
 		}
 
-    for (int i = 0; i < (int)mtwDevices.size(); ++i)
+		for (int i = 0; i < (int)mtwDevices.size(); ++i)
 		{
-      if (i == 0)
-      {
-        std::cout << "MTw Hum: " << mtwDevices[i]->deviceId().toString().toStdString();
-      }
-      if (i == 1)
-      {
-        std::cout << " MTw Exo: " << mtwDevices[i]->deviceId().toString().toStdString() << std::endl;
-      }
+			if (i == 0)
+			{
+				std::cout << "MTw Hum: " << mtwDevices[i]->deviceId().toString().toStdString();
+			}
+			if (i == 1)
+			{
+				std::cout << " MTw Exo: " << mtwDevices[i]->deviceId().toString().toStdString() << std::endl;
+			}
 		}
 
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+		std::this_thread::sleep_for(std::chrono::seconds(6)); // Or use XsTime::msleep(6000) ???
 
 		std::vector<XsVector> accData(mtwCallbacks.size());
 		std::vector<XsVector> gyroData(mtwCallbacks.size());
@@ -386,7 +389,7 @@ int main(int argc, char** argv)
 		//Sincroniza as epos
 		epos.sync();
 
-		endwait = clock () + 1 * CLOCKS_PER_SEC ;
+		endwait = clock() + 1 * CLOCKS_PER_SEC;
 		while (clock() < endwait) {}
 
 
@@ -402,32 +405,32 @@ int main(int argc, char** argv)
 		epos.sync();
 		eixo_out.ReadPDO01();
 		eixo_in.ReadPDO01();
-		accBasedControl xsens2Eposcan(&epos, &eixo_in, &eixo_out);
+		accBasedControl xsens2Eposcan(&epos, &eixo_in, &eixo_out, time_logging);
 
 		std::cout << "Loop de Controle, pressione qualquer tecla para interromper!" << std::endl;
 
-    float delay;
-    int printer = 0;
-    int scan_file = 0;
+		float delay;
+		int printer = 0;
+		int scan_file = 0;
 
-    clock_t beginning = 0;
-    clock_t loop_duration;
-    float freq;
+		clock_t beginning = 0;
+		clock_t loop_duration;
+		float freq;
 
 		while (!_kbhit())
 		{
 			XsTime::msleep(5);
-      //QueryPerformanceCounter(&tick_before);
+			//QueryPerformanceCounter(&tick_before);
 			//final_time = tick_before.QuadPart + 1*ticksSampleTime;
 
 			bool newDataAvailable = false;
-      std::chrono::system_clock::time_point mtw_data_stamp;
+			std::chrono::system_clock::time_point mtw_data_stamp;
 
 			for (size_t i = 0; i < mtwCallbacks.size(); ++i)
 			{
 				if (mtwCallbacks[i]->dataAvailable())
 				{
-          mtw_data_stamp = std::chrono::steady_clock::now();
+					mtw_data_stamp = std::chrono::steady_clock::now();
 
 					newDataAvailable = true;
 					XsDataPacket const * packet = mtwCallbacks[i]->getOldestPacket();
@@ -441,38 +444,38 @@ int main(int argc, char** argv)
 
 			if (newDataAvailable)
 			{
-				xsens2Eposcan.FiniteDiff((float) gyroData[0].value(2), (float) gyroData[1].value(2));
-        printer++;
-        scan_file++;
-        //xsens2Eposcan.Acc_Gravity((float) accData[0].value(0), (float) accData[0].value(1), (float) accData[1].value(0), (float) accData[1].value(1), (float) gyroData[0].value(2), (float) gyroData[1].value(2));
+				xsens2Eposcan.FiniteDiff((float)gyroData[0].value(2), (float)gyroData[1].value(2));
+				printer++;
+				scan_file++;
+				//xsens2Eposcan.Acc_Gravity((float) accData[0].value(0), (float) accData[0].value(1), (float) accData[1].value(0), (float) accData[1].value(1), (float) gyroData[0].value(2), (float) gyroData[1].value(2));
 
 				auto control_stamp = std::chrono::steady_clock::now();
 				delay = std::chrono::duration_cast<std::chrono::milliseconds>(control_stamp - mtw_data_stamp).count();
 
-        //clock_t end = clock();
-        //double delay = (double) (end - begin)/CLOCKS_PER_SEC;
+				//clock_t end = clock();
+				//double delay = (double) (end - begin)/CLOCKS_PER_SEC;
 				//printf("%f s\n", delay);   // printing the delay
 
-        loop_duration = clock() - beginning;
-        beginning = clock();
-        freq = (float) CLOCKS_PER_SEC / loop_duration;
+				loop_duration = clock() - beginning;
+				beginning = clock();
+				freq = (float)CLOCKS_PER_SEC / loop_duration;
 			}
 
-      if (printer == desiredUpdateRate / 5)   // 120
-      {
-        system("cls");
-        std::cout << xsens2Eposcan.ctrl_word;
-        printf(" delay %4.2f us rate: %5.2f Hz\n", delay, freq);
-        printer = 0;
-      }
+			if (printer == desiredUpdateRate / 5)   // 120
+			{
+				system("cls");
+				std::cout << xsens2Eposcan.ctrl_word;
+				printf(" delay %4.2f us rate: %5.2f Hz\n", delay, freq);
+				printer = 0;
+			}
 
-      if ( scan_file == desiredUpdateRate*9 )  // every 9s reads the gains_values.txt 
-      {
-        xsens2Eposcan.Gains_Scan();
-        scan_file = 0;
-      }
+			if (scan_file == desiredUpdateRate * 9)  // every 9s reads the gains_values.txt 
+			{
+				xsens2Eposcan.Gains_Scan();
+				scan_file = 0;
+			}
 
-      //QueryPerformanceCounter(&tick_after);
+			//QueryPerformanceCounter(&tick_after);
 			//while (final_time > tick_after.QuadPart) QueryPerformanceCounter(&tick_after);
 		}
 		(void)_getch();
@@ -522,11 +525,11 @@ int main(int argc, char** argv)
 	//FINALIZA A COMUNICAÇÃO COM AS EPOS
 	epos.StopPDOS(1);
 
-	endwait = clock () + 2 * CLOCKS_PER_SEC;
+	endwait = clock() + 2 * CLOCKS_PER_SEC;
 	while (clock() < endwait) {}
 
 	std::cout << "Successful exit." << std::endl;
-	std::cout << "Press [ENTER] to continue." << std::endl; 
+	std::cout << "Press [ENTER] to continue." << std::endl;
 	std::cin.get();
 
 	return 0;
@@ -539,7 +542,7 @@ int main(int argc, char** argv)
 void Habilita_Eixo(int ID)
 {
 
-	if ((ID==2) | (ID==0))
+	if ((ID == 2) | (ID == 0))
 	{
 
 		eixo_in.PDOsetControlWord_SwitchOn(false);
@@ -550,7 +553,7 @@ void Habilita_Eixo(int ID)
 
 		printf("\nENERGIZANDO O MOTOR 2 E HABILITANDO O CONTROLE");
 
-		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
+		endwait = clock() + 0.5 * CLOCKS_PER_SEC;
 		while (clock() < endwait) {}
 
 		eixo_in.PDOsetControlWord_SwitchOn(true);
@@ -559,7 +562,7 @@ void Habilita_Eixo(int ID)
 		eixo_in.PDOsetControlWord_EnableOperation(false);
 		eixo_in.WritePDO01();
 
-		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
+		endwait = clock() + 0.5 * CLOCKS_PER_SEC;
 		while (clock() < endwait) {}
 
 		eixo_in.PDOsetControlWord_SwitchOn(true);
@@ -576,7 +579,7 @@ void Habilita_Eixo(int ID)
 void Desabilita_Eixo(int ID)
 {
 
-	if ((ID==2) | (ID==0))
+	if ((ID == 2) | (ID == 0))
 	{
 		printf("\nDESABILITANDO O MOTOR E CONTROLE\n\n");
 
@@ -586,7 +589,7 @@ void Desabilita_Eixo(int ID)
 		eixo_in.PDOsetControlWord_EnableOperation(false);
 		eixo_in.WritePDO01();
 
-		endwait = clock () + 0.5 * CLOCKS_PER_SEC ;
+		endwait = clock() + 0.5 * CLOCKS_PER_SEC;
 		while (clock() < endwait) {}
 
 		eixo_in.PDOsetControlWord_SwitchOn(false);

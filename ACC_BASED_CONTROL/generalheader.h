@@ -27,7 +27,4 @@ AXIS eixo_in(CAN_INTERFACE, CAN_DATABASE, CAN_CLUSTER, NET_ID_SERVO_01);
 
 clock_t endwait;	// Clock de segundos
 
-FILE * logger;		// Ponteiro para arquivo
-
-
 #endif /* GENERAL_HEADER_H */
