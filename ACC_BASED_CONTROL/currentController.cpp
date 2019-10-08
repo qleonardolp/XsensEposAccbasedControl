@@ -1,5 +1,12 @@
+///////////////////////////////////////////////////////
+// Leonardo Felipe Lima Santos dos Santos, 2019     ///
+// leonardo.felipe.santos@usp.br	_____ ___  ___   //
+// github/bitbucket qleonardolp		| |  | \ \/   \  //
+////////////////////////////////	| |   \ \   |_|  //
+////////////////////////////////	\_'_/\_`_/__|    //
+///////////////////////////////////////////////////////
+
 #include "currentController.h"
-#include <stdio.h>
 #include <math.h>
 
 // Control Functions Descriptions //
@@ -9,12 +16,26 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 	m_epos->sync();	//Sincroniza a CAN
 
 	vel_hum = vel_hum - LPF_SMF*(vel_hum - velHum);
-	acc_hum = (vel_hum - vel_hum_ant)*RATE;
-	vel_hum_ant = vel_hum;
+	for (size_t i = sizeof(velhumVec) - 1; i > 0; --i)
+	{
+		velhumVec[i] = velhumVec[i - 1];
+	}
+	velhumVec[0] = vel_hum;
+	acc_hum = (-2*velhumVec[3] + 9*velhumVec[2] -18*velhumVec[1] + 11*velhumVec[0]) / (6)*RATE;
+
+	//acc_hum = (vel_hum - vel_hum_ant)*RATE;
+	//vel_hum_ant = vel_hum;
 
 	vel_exo = vel_exo - LPF_SMF*(vel_exo - velExo);
-	acc_exo = (vel_exo - vel_exo_ant)*RATE;
-	vel_exo_ant = vel_exo;
+	for (size_t i = sizeof(velexoVec) - 1; i > 0; --i)
+	{
+		velexoVec[i] = velexoVec[i - 1];
+	}
+	velexoVec[0] = vel_exo;
+	acc_exo = (-2*velexoVec[3] + 9*velexoVec[2] - 18*velexoVec[1] + 11*velexoVec[0]) / (6)*RATE;
+
+	//acc_exo = (vel_exo - vel_exo_ant)*RATE;
+	//vel_exo_ant = vel_exo;
 
 	m_eixo_out->ReadPDO01();
 	theta_l = ((float)(-m_eixo_out->PDOgetActualPosition() - pos0_out) / ENCODER_OUT) * 2 * MY_PI;				// [rad]
@@ -23,8 +44,15 @@ void accBasedControl::FiniteDiff(float velHum, float velExo)
 	theta_c = ((float)(m_eixo_in->PDOgetActualPosition() - pos0_in) / (ENCODER_IN * GEAR_RATIO)) * 2 * MY_PI;	// [rad]
 
 	torque_sea = torque_sea - LPF_SMF*(torque_sea - STIFFNESS*(theta_c - theta_l)); // smmooooooooooth operaaatoorr
-	d_torque_sea = (torque_sea - torque_sea_ant)*RATE;
-	torque_sea_ant = torque_sea;
+	for (size_t i = sizeof(torqueSeaVec) - 1; i > 0; --i)
+	{
+		torqueSeaVec[i] = torqueSeaVec[i - 1];
+	}
+	torqueSeaVec[0] = torque_sea;
+	d_torque_sea = (-2*torqueSeaVec[3] + 9*torqueSeaVec[2] - 18*torqueSeaVec[1] + 11*torqueSeaVec[0]) / (6)*RATE;
+
+	//d_torque_sea = (torque_sea - torque_sea_ant)*RATE;
+	//torque_sea_ant = torque_sea;
 
 	//grav_comp = (INERTIA_EXO + 0.038)*GRAVITY*(0.50)*sin(theta_l);
 	accbased_comp = K_ff*(4 * INERTIA_EXO)*acc_hum + Kp_A*(acc_hum - acc_exo) + Ki_A*(vel_hum - vel_exo);

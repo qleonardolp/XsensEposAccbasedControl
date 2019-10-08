@@ -1,8 +1,17 @@
+///////////////////////////////////////////////////////
+// Leonardo Felipe Lima Santos dos Santos, 2019     ///
+// leonardo.felipe.santos@usp.br	_____ ___  ___   //
+// github/bitbucket qleonardolp		| |  | \ \/   \  //
+////////////////////////////////	| |   \ \   |_|  //
+////////////////////////////////	\_'_/\_`_/__|    //
+///////////////////////////////////////////////////////
+
 #ifndef CURRENT_CONTROL_H
 #define CURRENT_CONTROL_H
 
 #include "AXIS.h"
 #include "EPOS_NETWORK.h"
+#include <stdio.h>
 #include <time.h>
 
 // CONSTANTES
@@ -19,7 +28,7 @@
 
 #define		CURRENT_MAX		3.1000		// Max corrente nominal no motor Maxon RE40 [A]
 #define		TORQUE_CONST	60.300		// Constante de torque do motor RE40	[N.m/mA]
-
+#define		SPEED_CONST		158.00		// Constante de velocidade do motor RE40 [rpm/V]
 
 #define     GRAVITY         9.8066      // [m/s^2]
 #define     INERTIA_EXO     0.0655      // [Kg.m^2], +- 0.0006, estimado em 2019-08-21
@@ -69,6 +78,12 @@ public:
 		vel_hum_ant = 0;
 		vel_exo_ant = 0;
 
+		for (size_t i = 0; i < 4; ++i)
+		{
+			velhumVec[i] = 0;
+			velexoVec[i] = 0;
+		}
+
 		torque_sea = 0;
 		torque_sea_ant = 0;
 		setpoint = 0;
@@ -84,7 +99,7 @@ public:
 			time(&rawtime);
 			timeinfo = localtime(&rawtime);
 
-			strftime(logger_filename, 30, "%Y-%m-%d-%H-%M-%S.txt", timeinfo);
+			strftime(logger_filename, 40, "./data/%Y-%m-%d-%H-%M-%S.txt", timeinfo);
 			logger = fopen(logger_filename, "wt");
 			if (logger != NULL)
 			{
@@ -107,7 +122,7 @@ public:
 	// acc-gravity
 	void Acc_Gravity(float accHum_X, float accHum_Y, float accExo_X, float accExo_Y, float velHum_Z, float velExo_Z);
 
-  void OmegaControl(float velHum, float velExo);
+	void OmegaControl(float velHum, float velExo);
 
 	void Gains_Scan();
 
@@ -127,7 +142,7 @@ private:
 	AXIS* m_eixo_out;
 
 	FILE* logger;
-	char logger_filename[30];
+	char logger_filename[40];
 	int log_count;
 	bool logging;
 
@@ -146,6 +161,10 @@ private:
 	float vel_exo;			// [rad/s]
 	float vel_hum_ant;		// [rad/s]
 	float vel_exo_ant;		// [rad/s]
+
+	float velhumVec[4];		// [rad/s]
+	float velexoVec[4];		// [rad/s]
+	float torqueSeaVec[4];	// [N.m]
 
 	float setpoint;			// [mA]
 	float setpoint_filt;

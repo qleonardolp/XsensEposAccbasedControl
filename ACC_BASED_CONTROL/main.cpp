@@ -469,7 +469,7 @@ int main(int argc, char** argv)
 				printer = 0;
 			}
 
-			if (scan_file == desiredUpdateRate * 9)  // every 9s reads the gains_values.txt 
+			if (scan_file == desiredUpdateRate * 5)  // every 5s reads the gains_values.txt 
 			{
 				xsens2Eposcan.Gains_Scan();
 				scan_file = 0;
