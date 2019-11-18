@@ -1,4 +1,4 @@
-acc_hum[rad/s2]  acc_exo[rad/s2]  vel_hum[rad/s]  vel_exo[rad/s]  vel_motor[rpm]  actual_Vel[rpm]  Voltage[V]
+acc_{hum}[rpm/s]  acc_{exo}[rpm/s]  vel_{hum}[rpm]  vel_{exo}[rpm]  vel_{motor}[rpm]  actual\_Vel[rpm]  Voltage[V]
 -0.004  0.000  -0.001  0.000  -23.715    -21  0.133
 -0.010  -109.305  -0.001  0.000  -5.460    -21  0.133
 -0.008  -224.886  0.000  0.000  36.463    -22  0.139

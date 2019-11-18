@@ -1,4 +1,4 @@
-acc_hum[rad/s2]  acc_exo[rad/s2]  vel_hum[rad/s]  vel_exo[rad/s]  theta_m[deg]  theta_c[deg]  theta_l[deg]
+acc_{hum}[rad/s^2]  acc_{exo}[rad/s^2]  vel_{hum}[rad/s]  vel_{exo}[rad/s]  theta_m[deg]  theta_c[deg]  theta_l[deg]
 0.019  0.963  0.003  0.169  -37140.531  0.000  0.000
 -0.014  1.401  -0.005  0.111  -66821.438  0.000  0.000
 -0.039  0.728  -0.005  -0.062  -90540.969  0.000  0.000

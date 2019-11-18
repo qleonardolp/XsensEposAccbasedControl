@@ -1,4 +1,4 @@
-SetPt[mA]  I_m[mA] theta_l[deg]  theta_c[deg]  T_acc[N.m]  acc_hum[rad/s2]  acc_exo[rad/s2]  vel_hum[rad/s]  vel_exo[rad/s]  vel_motor[rad/s]
+SetPt[mA]  I_m[mA] theta_l[deg]  theta_c[deg]  T_{acc}[N.m]  acc_{hum}[rad/s^2]  acc_{exo}[rad/s^2]  vel_{hum}[rad/s]  vel_{exo}[rad/s]  vel_{motor}[rad/s]
 -0.000      0   0.000  0.000  -0.000  -0.000  -0.000  -0.041  0.001  0.000
 2.410     12   0.000  0.000  723.600  148278.625  148278.641  0.027  -0.009  0.000
 2.130      1   0.000  0.000  61.245  12550.104  12511.804  2.338  2.365  0.000
