@@ -10,158 +10,205 @@ positionff = importdata('2019-11-08-19-26-45_P.txt');
 
 dt = 0.008;     % time step
 
-%% Plots of the Current Mode [C]
+%% Current Mode [C]
 
 t = linspace(0, dt*length(current.data(:,1)), length(current.data(:,1)));
 
-sg2_accHum = zeros(1000,1);
+% Compute the FFT of the Hum Vel curve:
+vH_fft = fft(current.data(5501:6500,8));
+% Compute the two-sided spectrum P2. Then compute the single-sided spectrum P1 based on P2 
+% and the even-valued signal length L.
+L = length(current.data(5501:6500,8));
+P2 = abs(vH_fft/L);
+P1 = P2(1:L/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+% Define the frequency domain f
+f = (1/dt)*(0:(L/2))/L;
 
+vH_Axf = [P1 f'];
+[A_m, I] = max(vH_Axf,[],1);
+A_vh = A_m(1);
+f_vh = vH_Axf(I(1),2);
+
+sg2_accHum = zeros(1000,1);
+%{
 for i = 5501 : 6500
     sg2_accHum(i - 5500) = ( 5*current.data(i-1,8) +4*current.data(i-2,8) + 3*current.data(i-3,8)...
     +2*current.data(i-4,8) +1*current.data(i-5,8) +0*current.data(i-6,8) -1*current.data(i-7,8)...
     -2*current.data(i-8,8) -3*current.data(i-9,8) -4*current.data(i-10,8) -5*current.data(i-11,8)...
-    )/110;
+    )/(110*dt);
 end
+%}
 
-figure('Name', 'Current Setpoint in Current Mode')
-plot(t(5500:6500), current.data([5500:6500],1),'-', 'LineWidth', 0.7)
+% explore others SG fits...
+
+%%{ SG 1st derivative, linear, 17 pts:
+for i = 5501 : 6500
+    sg2_accHum(i - 5500) = ( 8*current.data(i-1,8) + 7*current.data(i-2,8) + 6*current.data(i-3,8)...
+    + 5*current.data(i-4,8) + 4*current.data(i-5,8) + 3*current.data(i-6,8) + 2*current.data(i-7,8)...
+    + 1*current.data(i-8,8) + 0*current.data(i-9,8) - 1*current.data(i-10,8) - 2*current.data(i-11,8)...
+    - 3*current.data(i-12,8) - 4*current.data(i-13,8) - 5*current.data(i-14,8) - 6*current.data(i-15,8)...
+    - 7*current.data(i-16,8) - 8*current.data(i-17,8) )/(408*dt);
+end
+%}
+
+figure('Name', 'Current Mode')
+plot(t(5501:6500), current.data([5501:6500],1),'-', 'LineWidth', 0.7)
 hold on
-plot(t(5500:6500), current.data([5500:6500],2),':', 'LineWidth', 1.2)
+plot(t(5501:6500), current.data([5501:6500],2),':', 'LineWidth', 1.2)
 grid on
 legend( current.colheaders{1,1} , char(current.textdata(1,2)) )
-xlabel('time [s]')
-hold off
-%%
-figure('Name', 'Human angular Vel and Acc [C]')
-plot(t(5500:6500), current.data([5500:6500],6),'-', 'LineWidth', 0.7)
-hold on
-plot(t(5500:6500), current.data([5500:6500],8),':', 'LineWidth', 1.2)
-hold on
-plot(t(5501:6500), sg2_accHum(:,1))
-grid on
-legend( current.colheaders{1,6} , char(current.textdata(1,8)), 'acc_{hum} sg2')
+title('Current Setpoint')
 xlabel('time [s]')
 hold off
 
-figure('Name', 'Speed measured with MTw on the Exo vs Motor Speed [C]')
+figure('Name', 'Current Mode')
+plot(t(5501:6500), current.data(5501:6500,6),'-', 'LineWidth', 0.7)
+hold on
+plot(t(5501:6500), current.data(5501:6500,8),':', 'LineWidth', 1.2)
+hold on
+% from the FFT on the Hum Vel:
+plot(t(5501:6500), A_vh*cos( 2*pi*f_vh*t(5501:6500) )) % Hum Vel from the FFT
+plot(t(5501:6500), -2*pi*f_vh*A_vh*sin( 2*pi*f_vh*t(5501:6500) )) % Hum Acc from the vH_fft
+plot(t(5501:6500), sg2_accHum(:,1))
+grid on
+legend( '*acc_h sg_{11}' , char(current.textdata(1,8)),'vel_h fft' , 'acc_h fft','acc_h sg_{17}')
+title('Human angular Vel and Acc')
+xlabel('time [s]')
+hold off
+
+figure('Name', 'Curent Mode')
 plot(t(5500:6500), current.data([5500:6500],9),'-', 'LineWidth', 0.7)
 hold on
 plot(t(5500:6500), (1/150)*current.data([5500:6500],10),':', 'LineWidth', 1.2)
 grid on
 legend( char(current.textdata(9)) , char(current.textdata(10)) )
+title('Speed measured with MTw on the Exo vs Motor Speed')
 xlabel('time [s]')
 hold off
 
-figure('Name', 'Torques [C]')
+figure('Name', 'Current Mode')
 plot(t(5500:6500), 104*(current.data([5500:6500],4) - current.data([5500:6500],3)),':r', 'LineWidth', 0.8)
 hold on
 plot(t(5500:6500), current.data([5500:6500],5), ':b')
 grid on
 legend('Torque SEA [N.m]', current.colheaders{1,5})
+title('Torques')
 xlabel('time [s]')
 hold off
 
-%% Plots of Current Mode with Kalman Filter
+%% Current Mode with Kalman Filter [K] Plots
 
 t = linspace(0, dt*length(currentKF.data(:,1)), length(currentKF.data(:,1)));
 
-figure('Name', 'Current Setpoint in CurrentKF Mode')
+figure('Name', 'Current with KF [K]')
 plot(t, currentKF.data(:,1),'-', 'LineWidth', 0.7)
 hold on
 plot(t, currentKF.data(:,2),':', 'LineWidth', 1.2)
 grid on
 legend( currentKF.colheaders{1,1} , currentKF.colheaders{1,2} )
+title('Current Setpoint')
 xlabel('time [s]')
 hold off
 
-figure('Name', 'Human angular Vel and Acc [K]')
+figure('Name', 'Current with KF [K]')
 plot(t, currentKF.data(:,6),'-', 'LineWidth', 0.7)
 hold on
 plot(t, currentKF.data(:,8),':', 'LineWidth', 1.2)
 grid on
 legend( currentKF.colheaders{1,6} , currentKF.colheaders{1,8} )
+title('Human angular Vel and Acc')
 xlabel('time [s]')
 hold off
 
-%% Plots for Speed Mode (using only one MTw)
+%% Speed Mode (using only one MTw) [S] Plots 
 
 t = linspace(0, dt*length(speed.data(:,1)), length(speed.data(:,1)));
 
-figure('Name', 'Velocity Setpoint on Speed Mode [S]')
+figure('Name', 'Speed Mode [S]')
 plot(t, speed.data(:,5))
 hold on
 plot(t, speed.data(:,6))
 grid on
 legend(char(speed.colheaders(5)), char(speed.colheaders(6)))
+title('Velocity Setpoint')
 xlabel('time [s]')
 hold off
 
-figure('Name', 'Hum angular Vel and Acc [S]')
+figure('Name', 'Speed Mode [S]')
 plot(t, speed.data(:,1))
 hold on
 plot(t, speed.data(:,3))
 grid on
 legend(char(speed.colheaders(1)), char(speed.colheaders(3)))
+title('Hum angular Vel and Acc')
 xlabel('time [s]')
 hold off
 
-figure('Name', 'Vel Hum X Vel Motor [S]')
-plot(t, 200*speed.data(:,3))
+figure('Name', 'Speed Mode [S]')
+kv_ff = 200;
+plot(t, kv_ff*speed.data(:,3))
 hold on
 plot(t, (1/150)*speed.data(:,5))
 grid on
-legend('k_{ff} vel_{hum} [rpm]', '(1/N)*vel_{motor} [rpm]')
+legend('k_{ff}^V vel_{hum} [rpm]', '(1/N)*vel_{motor} [rpm]')
+title('Vel Hum X Vel Motor')
 xlabel('time [s]')
 hold off
 
-%% Plots for Speed Mode (using two MTw, Hum and Exo)
+%% Speed Mode (using two MTw, Hum and Exo) [S*] Plots 
 
 t = linspace(0, dt*length(speed_exo.data(:,1)), length(speed_exo.data(:,1)));
 
-figure('Name', 'Velocity Setpoint on Speed Mode [S*]')
+figure('Name', 'Speed Mode [S*]')
 plot(t, speed_exo.data(:,5))
 hold on
 plot(t, speed_exo.data(:,6))
 grid on
 legend(char(speed_exo.colheaders(5)), char(speed_exo.colheaders(6)))
+title('Velocity Setpoint')
 xlabel('time [s]')
 hold off
 
-figure('Name', 'Hum angular Vel and Acc [S*]')
+figure('Name', 'Speed Mode [S*]')
 plot(t, speed_exo.data(:,1))
 hold on
 plot(t, speed_exo.data(:,3))
 grid on
 legend(char(speed_exo.colheaders(1)), char(speed_exo.colheaders(3)))
+title('Hum angular Vel and Acc')
 xlabel('time [s]')
 hold off
 
-figure('Name', 'Vel Hum X Vel Motor [S*]')
+figure('Name', 'Speed Mode [S*]')
 plot(t, 200*speed_exo.data(:,3))
 hold on
 plot(t, (1/150)*speed_exo.data(:,5))
 grid on
 legend('k_{ff} vel_{hum} [rpm]', '(1/N)*vel_{motor} [rpm]')
+title('Vel Hum X Vel Motor')
 xlabel('time [s]')
 hold off
 
-%% Plots of Position Mode [P]
+%% Position Mode [P] Plots
 
 t = linspace(0, dt*length(positionff.data(:,1)), length(positionff.data(:,1)));
 
-figure('Name', 'Human angular Vel and Acc [P]')
+figure('Name', 'Position Mode [P]')
 plot(t, positionff.data(:,1))
 hold on
 plot(t, positionff.data(:,4))
 grid on
 legend( positionff.colheaders{1,1}, positionff.colheaders{1,3})
+title('Human angular Vel and Acc')
 xlabel('time [s]')
 hold off
 
-figure('Name', 'Torque SEA [P]')
+figure('Name', 'Position Mode [P]')
 plot(t, 104*(positionff.data(:,6) - positionff.data(:,7)) )
 grid on
 legend('T_{sea} [N.m]')
+title('Torque SEA')
 xlabel('time [s]')
 hold off
 
