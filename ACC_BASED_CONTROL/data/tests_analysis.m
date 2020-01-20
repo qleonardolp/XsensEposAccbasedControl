@@ -14,6 +14,7 @@ dt = 0.008;     % time step
 
 t = linspace(0, dt*length(current.data(:,1)), length(current.data(:,1)));
 
+%{
 % Compute the FFT of the Hum Vel curve:
 vH_fft = fft(current.data(5501:6500,8));
 % Compute the two-sided spectrum P2. Then compute the single-sided spectrum P1 based on P2 
@@ -29,6 +30,7 @@ vH_Axf = [P1 f'];
 [A_m, I] = max(vH_Axf,[],1);
 A_vh = A_m(1);
 f_vh = vH_Axf(I(1),2);
+%}
 
 sg2_accHum = zeros(1000,1);
 %{
@@ -40,9 +42,8 @@ for i = 5501 : 6500
 end
 %}
 
-% explore others SG fits...
-
-%%{ SG 1st derivative, linear, 17 pts:
+% explore others SG fits, e.g. SG 17 pts
+%{
 for i = 5501 : 6500
     sg2_accHum(i - 5500) = ( 8*current.data(i-1,8) + 7*current.data(i-2,8) + 6*current.data(i-3,8)...
     + 5*current.data(i-4,8) + 4*current.data(i-5,8) + 3*current.data(i-6,8) + 2*current.data(i-7,8)...
@@ -51,6 +52,21 @@ for i = 5501 : 6500
     - 7*current.data(i-16,8) - 8*current.data(i-17,8) )/(408*dt);
 end
 %}
+
+accH_IL = zeros(1000,1); % using a Proportional Gain and in loop Integrator (IL)
+f_cf = 8.5;
+acc_IL_fb = 0;
+acc_IL_last = zeros(4,1);
+
+for i=5501 : 6500
+    accH_IL(i-5500) = f_cf*(current.data(i,8) - acc_IL_fb);
+    % Simpson Rule, h = (4*dt)/n, if n=4, h = dt
+    acc_IL_fb = dt/3*(acc_IL_last(1) + 4*acc_IL_last(2) + 2*acc_IL_last(3) + 4*acc_IL_last(4) + accH_IL(i-5500)); % trapeziodal integral
+    acc_IL_last(1) = acc_IL_last(2);
+    acc_IL_last(2) = acc_IL_last(3);
+    acc_IL_last(3) = acc_IL_last(4);
+    acc_IL_last(4) = accH_IL(i-5500);
+end
 
 figure('Name', 'Current Mode')
 plot(t(5501:6500), current.data([5501:6500],1),'-', 'LineWidth', 0.7)
@@ -68,11 +84,11 @@ hold on
 plot(t(5501:6500), current.data(5501:6500,8),':', 'LineWidth', 1.2)
 hold on
 % from the FFT on the Hum Vel:
-plot(t(5501:6500), A_vh*cos( 2*pi*f_vh*t(5501:6500) )) % Hum Vel from the FFT
-plot(t(5501:6500), -2*pi*f_vh*A_vh*sin( 2*pi*f_vh*t(5501:6500) )) % Hum Acc from the vH_fft
-plot(t(5501:6500), sg2_accHum(:,1))
+% plot(t(5501:6500), A_vh*cos( 2*pi*f_vh*t(5501:6500) )) % Hum Vel from the FFT
+% plot(t(5501:6500), -2*pi*f_vh*A_vh*sin( 2*pi*f_vh*t(5501:6500) )) % Hum Acc from the vH_fft
+plot(t(5501:6500), accH_IL(:,1))
 grid on
-legend( '*acc_h sg_{11}' , char(current.textdata(1,8)),'vel_h fft' , 'acc_h fft','acc_h sg_{17}')
+legend( '*acc_h sg_{11}' , char(current.textdata(1,8)), 'acc_h IL')
 title('Human angular Vel and Acc')
 xlabel('time [s]')
 hold off
