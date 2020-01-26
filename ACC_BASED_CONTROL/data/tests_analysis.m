@@ -2,7 +2,7 @@ clc
 clear all
 close all
 
-current = importdata('2019-11-08-11-43-48_C.txt');
+current = importdata('2020-01-25-16-25-19_C.txt');
 currentKF = importdata('2019-11-08-12-04-27_K.txt');
 speed = importdata('2019-11-08-16-05-15_S.txt');
 speed_exo = importdata('2019-11-08-19-13-40_S_exo.txt');
@@ -32,29 +32,8 @@ A_vh = A_m(1);
 f_vh = vH_Axf(I(1),2);
 %}
 
-sg2_accHum = zeros(1000,1);
-%{
-for i = 5501 : 6500
-    sg2_accHum(i - 5500) = ( 5*current.data(i-1,8) +4*current.data(i-2,8) + 3*current.data(i-3,8)...
-    +2*current.data(i-4,8) +1*current.data(i-5,8) +0*current.data(i-6,8) -1*current.data(i-7,8)...
-    -2*current.data(i-8,8) -3*current.data(i-9,8) -4*current.data(i-10,8) -5*current.data(i-11,8)...
-    )/(110*dt);
-end
-%}
-
-% explore others SG fits, e.g. SG 17 pts
-%{
-for i = 5501 : 6500
-    sg2_accHum(i - 5500) = ( 8*current.data(i-1,8) + 7*current.data(i-2,8) + 6*current.data(i-3,8)...
-    + 5*current.data(i-4,8) + 4*current.data(i-5,8) + 3*current.data(i-6,8) + 2*current.data(i-7,8)...
-    + 1*current.data(i-8,8) + 0*current.data(i-9,8) - 1*current.data(i-10,8) - 2*current.data(i-11,8)...
-    - 3*current.data(i-12,8) - 4*current.data(i-13,8) - 5*current.data(i-14,8) - 6*current.data(i-15,8)...
-    - 7*current.data(i-16,8) - 8*current.data(i-17,8) )/(408*dt);
-end
-%}
-
 accH_IL = zeros(1000,1); % using a Proportional Gain and in loop Integrator (IL)
-f_cf = 8.5;
+f_cf = 1.6;
 acc_IL_fb = 0;
 acc_IL_last = zeros(4,1);
 
@@ -68,7 +47,7 @@ for i=5501 : 6500
     acc_IL_last(4) = accH_IL(i-5500);
 end
 
-figure('Name', 'Current Mode')
+figure('Name', 'Current Mode 2020-01-25-16-25-19')
 plot(t(5501:6500), current.data([5501:6500],1),'-', 'LineWidth', 0.7)
 hold on
 plot(t(5501:6500), current.data([5501:6500],2),':', 'LineWidth', 1.2)
@@ -78,7 +57,7 @@ title('Current Setpoint')
 xlabel('time [s]')
 hold off
 
-figure('Name', 'Current Mode')
+figure('Name', 'Current Mode 2020-01-25-16-25-19')
 plot(t(5501:6500), current.data(5501:6500,6),'-', 'LineWidth', 0.7)
 hold on
 plot(t(5501:6500), current.data(5501:6500,8),':', 'LineWidth', 1.2)
@@ -88,12 +67,12 @@ hold on
 % plot(t(5501:6500), -2*pi*f_vh*A_vh*sin( 2*pi*f_vh*t(5501:6500) )) % Hum Acc from the vH_fft
 plot(t(5501:6500), accH_IL(:,1))
 grid on
-legend( '*acc_h sg_{11}' , char(current.textdata(1,8)), 'acc_h IL')
+legend( '*acc_h' , char(current.textdata(1,8)), 'acc_h IL')
 title('Human angular Vel and Acc')
 xlabel('time [s]')
 hold off
 
-figure('Name', 'Curent Mode')
+figure('Name', 'Curent Mode 2020-01-25-16-25-19')
 plot(t(5500:6500), current.data([5500:6500],9),'-', 'LineWidth', 0.7)
 hold on
 plot(t(5500:6500), (1/150)*current.data([5500:6500],10),':', 'LineWidth', 1.2)
@@ -103,7 +82,7 @@ title('Speed measured with MTw on the Exo vs Motor Speed')
 xlabel('time [s]')
 hold off
 
-figure('Name', 'Current Mode')
+figure('Name', 'Current Mode 2020-01-25-16-25-19')
 plot(t(5500:6500), 104*(current.data([5500:6500],4) - current.data([5500:6500],3)),':r', 'LineWidth', 0.8)
 hold on
 plot(t(5500:6500), current.data([5500:6500],5), ':b')
