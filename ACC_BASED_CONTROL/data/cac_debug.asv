@@ -1,0 +1,55 @@
+clc
+clear all
+close all
+
+onlyEPOS_minus_vel_exo = importdata('2020-02-02-15-48-37_minus_vel_exo.txt');
+onlyEPOS_vel_exo = importdata('2020-02-02-15-52-45_vel_exo.txt');
+seaTfromEPOS = importdata('2020-02-01-21-49-14_CAC_seaTfromEPOS.txt');
+seaTfromMTwEPOS = importdata('2020-02-01-22-02-29_CAC_seaTfromMTwEPOS.txt');
+
+
+dt = 0.008;     % time step
+
+%% Collocated Admittance Control [CAC]
+
+t = linspace(0, dt*length(onlyEPOS_minus_vel_exo.data(:,1)), length(onlyEPOS_minus_vel_exo.data(:,1)));
+
+figure('Name', 'CAC')
+plot(t, onlyEPOS_minus_vel_exo.data(:,1),'-', 'LineWidth', 0.7)
+hold on
+plot(t, onlyEPOS_minus_vel_exo.data(:,2),'-', 'LineWidth', 0.7)
+grid on
+legend( onlyEPOS_minus_vel_exo.colheaders{1,1} , char(onlyEPOS_minus_vel_exo.textdata(1,2)) )
+title('CAC Velocities (velexo = - m_eixo_out)')
+xlabel('time [s]'), ylabel('rad/s')
+hold off
+
+t = linspace(0, dt*length(onlyEPOS_vel_exo.data(:,1)), length(onlyEPOS_vel_exo.data(:,1)));
+
+figure('Name', 'CAC')
+plot(t, onlyEPOS_vel_exo.data(:,1),'-', 'LineWidth', 0.7)
+hold on
+plot(t, onlyEPOS_vel_exo.data(:,2),'-', 'LineWidth', 0.7)
+grid on
+legend( onlyEPOS_vel_exo.colheaders{1,1} , char(onlyEPOS_vel_exo.textdata(1,2)) )
+title('CAC Velocities (velexo = m_eixo_out)')
+xlabel('time [s]'), ylabel('rad/s')
+hold off
+
+%%  T_Sea analysis
+
+t = linspace(0, dt*length(seaTfromEPOS.data(:,1)), length(seaTfromEPOS.data(:,1)));
+
+figure('Name', 'CAC')
+plot(t, seaTfromEPOS.data(:,6),'-', 'LineWidth', 0.7)
+hold on
+t = linspace(0, dt*length(seaTfromMTwEPOS.data(:,1)), length(seaTfromMTwEPOS.data(:,1)));
+plot(t, seaTfromMTwEPOS.data(:,6),'-', 'LineWidth', 0.7)
+grid on
+legend( 'SeaT EPOS' , 'SeaT MTwEPOS' )
+xlabel('time [s]'), ylabel('N.m')
+hold off
+
+%% Derivative analysis
+
+OmegaControl = importdata('202

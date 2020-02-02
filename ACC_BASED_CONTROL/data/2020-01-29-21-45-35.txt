@@ -1,2 +1,0 @@
-acc_hum[rad/s2]  acc_exo[rad/s2]  vel_hum[rad/s]  vel_exo[rad/s]  jerk_hum[rad/s3]  jerk_exo[rad/s3]  vel_motor[rad/s]  exo_Vel[rad/s]  actual_Vel[rad/s]
--0.393  0.159  -0.245  0.099  -0.628  0.254  -7.737  0.000      0
