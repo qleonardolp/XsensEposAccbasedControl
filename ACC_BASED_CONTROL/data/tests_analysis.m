@@ -207,3 +207,17 @@ title('Torque SEA')
 xlabel('time [s]')
 hold off
 
+%%  accBasedController
+
+abc_data = importdata('2021-02-20-20-50-48.txt');
+
+figure, plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,3)])), grid on
+legend('accHum','velHum')
+
+figure, 
+subplot(2,1,1)
+plot(abc_data.data(:,1), rad2deg([abc_data.data(:,3) abc_data.data(:,4)])), grid on
+legend('velHum','velExo'), ylabel('deg/s')
+subplot(2,1,2)
+plot(abc_data.data(:,1), abc_data.data(:,5)), grid on
+legend('Tsea'), ylabel('N.m')
