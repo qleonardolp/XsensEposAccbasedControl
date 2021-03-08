@@ -208,16 +208,36 @@ xlabel('time [s]')
 hold off
 
 %%  accBasedController
+abc_data = importdata('2021-02-28-19-10-01.txt');
+t_end = abc_data.data(end,1)
+% figure, plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,4)])), grid on
+% legend('velHum','accHum')
 
-abc_data = importdata('2021-02-20-20-50-48.txt');
-
-figure, plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,3)])), grid on
-legend('accHum','velHum')
+%%
+close all
 
 figure, 
-subplot(2,1,1)
-plot(abc_data.data(:,1), rad2deg([abc_data.data(:,3) abc_data.data(:,4)])), grid on
+
+subplot(4,1,1)
+plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,3)])), grid on
 legend('velHum','velExo'), ylabel('deg/s')
-subplot(2,1,2)
-plot(abc_data.data(:,1), abc_data.data(:,5)), grid on
-legend('Tsea'), ylabel('N.m')
+
+subplot(4,1,2)
+plot(abc_data.data(:,1), Ks*(abc_data.data(:,6) - abc_data.data(:,7))), hold on
+plot(abc_data.data(:,1), -We*Le*sin(abc_data.data(:,7))), grid on
+legend('Tsea','T_W'), ylabel('N.m')
+
+subplot(4,1,3)
+plot(abc_data.data(:,1), rad2deg(abc_data.data(:,7))), grid on
+legend('theta_{exo}'), ylabel('deg')
+
+subplot(4,1,4)
+des_current = -We*Le*sin(abc_data.data(:,7)) + Je*abc_data.data(:,4) + ...
+                0.3507*(abc_data.data(:,4) - abc_data.data(:,5)) + ...
+                4.803*(abc_data.data(:,2) - abc_data.data(:,3));
+des_current = des_current/(N*KI);
+CURRENT_MAX = 3.1400;
+plot(abc_data.data(:,1), des_current), hold on
+yline(CURRENT_MAX,'--r',{'I_{max}'})
+yline(-CURRENT_MAX,'--r'), grid on
+legend('Motor I_d'), ylabel('A')
