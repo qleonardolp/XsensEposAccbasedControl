@@ -85,14 +85,21 @@ xlabel('time [s]')
 hold off
 
 %%  accBasedController
-abc_data = importdata('2021-02-28-19-10-01.txt');
+% abc_data = importdata('2021-02-28-19-10-01.txt');
+% abc_data = importdata('abc_com_ID/2021-03-27-21-56-05.txt');
+% abc_data = importdata('abc_sem_ID/2021-03-27-21-59-14.txt');
+% abc_data = importdata('abc_acc_motor_/2021-03-28-09-51-40.txt');
+% akf_data = importdata('abc_acc_motor_/akf-2021-03-28-09-51-40.txt');
+abc_data = importdata('cac_com_IDcorr_com_ff_fb/2021-03-28-10-41-27.txt');
 t_end = abc_data.data(end,1)
 % figure, plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,4)])), grid on
 % legend('velHum','accHum')
 
 %%
-close all
+% close all
 
+Kp = 0.5436;
+Ki = 11.560;
 figure, 
 subplot(4,1,1)
 plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,3)])), grid on
@@ -108,12 +115,41 @@ plot(abc_data.data(:,1), rad2deg(abc_data.data(:,7))), grid on
 legend('theta_{exo}'), ylabel('deg')
 
 subplot(4,1,4)
-des_current = -We*Le*sin(abc_data.data(:,7)) + Je*abc_data.data(:,4) + ...
-                0.3507*(abc_data.data(:,4) - abc_data.data(:,5)) + ...
-                4.803*(abc_data.data(:,2) - abc_data.data(:,3));
+des_current = -0*We*Le*sin(abc_data.data(:,7)) + Je*abc_data.data(:,4) + ...
+                Kp*(abc_data.data(:,4) - abc_data.data(:,5)) + ...
+                Ki*(abc_data.data(:,2) - abc_data.data(:,3));
+            % + Ja*abc_data.data(:,9)
 des_current = des_current/(N*KI);
 CURRENT_MAX = 3.1400;
 plot(abc_data.data(:,1), des_current), hold on
 yline(CURRENT_MAX,'--r',{'I_{max}'})
 yline(-CURRENT_MAX,'--r'), grid on
 legend('Motor I_d'), ylabel('A')
+
+%% AKF comparative
+% obs: vel_act and m_current is probably missing on zk
+
+figure, plot(abc_data.data(:,1), rad2deg(abc_data.data(:,2))), grid on
+hold on,
+plot(akf_data(:,1), rad2deg(akf_data(:,7)))
+title('Hum Vel')
+
+figure, plot(abc_data.data(:,1), rad2deg(abc_data.data(:,3))), grid on
+hold on,
+plot(akf_data(:,1), rad2deg(akf_data(:,5)))
+title('Exo Vel')
+
+figure, plot(abc_data.data(:,1), rad2deg(abc_data.data(:,8))), grid on
+hold on,
+plot(akf_data(:,1), rad2deg(akf_data(:,6)))
+title('Act Vel')
+
+figure, plot(abc_data.data(:,1), rad2deg(abc_data.data(:,4))), grid on
+hold on,
+plot(akf_data(:,1), rad2deg(akf_data(:,8)))
+title('Hum Acc')
+
+figure, plot(abc_data.data(:,1), rad2deg(abc_data.data(:,5))), grid on
+hold on,
+plot(akf_data(:,1), rad2deg(akf_data(:,9)))
+title('Exo Acc')
