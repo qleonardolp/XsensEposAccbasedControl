@@ -2,16 +2,8 @@ clc
 clear all
 close all
 
-current = importdata('2020-01-25-16-25-19_C.txt');
-currentKF = importdata('2019-11-08-12-04-27_K.txt');
-speed = importdata('2019-11-08-16-05-15_S.txt');
-speed_exo = importdata('2019-11-08-19-13-40_S_exo.txt');
-positionff = importdata('2019-11-08-19-26-45_P.txt');
-
 dt = 0.008;     % time step
-
 %% Current Mode [C]
-
 t = linspace(0, dt*length(current.data(:,1)), length(current.data(:,1)));
 
 %{
@@ -92,121 +84,6 @@ title('Torques')
 xlabel('time [s]')
 hold off
 
-%% Current Mode with Kalman Filter [K] Plots
-
-t = linspace(0, dt*length(currentKF.data(:,1)), length(currentKF.data(:,1)));
-
-figure('Name', 'Current with KF [K]')
-plot(t, currentKF.data(:,1),'-', 'LineWidth', 0.7)
-hold on
-plot(t, currentKF.data(:,2),':', 'LineWidth', 1.2)
-grid on
-legend( currentKF.colheaders{1,1} , currentKF.colheaders{1,2} )
-title('Current Setpoint')
-xlabel('time [s]')
-hold off
-
-figure('Name', 'Current with KF [K]')
-plot(t, currentKF.data(:,6),'-', 'LineWidth', 0.7)
-hold on
-plot(t, currentKF.data(:,8),':', 'LineWidth', 1.2)
-grid on
-legend( currentKF.colheaders{1,6} , currentKF.colheaders{1,8} )
-title('Human angular Vel and Acc')
-xlabel('time [s]')
-hold off
-
-%% Speed Mode (using only one MTw) [S] Plots 
-
-t = linspace(0, dt*length(speed.data(:,1)), length(speed.data(:,1)));
-
-figure('Name', 'Speed Mode [S]')
-plot(t, speed.data(:,5))
-hold on
-plot(t, speed.data(:,6))
-grid on
-legend(char(speed.colheaders(5)), char(speed.colheaders(6)))
-title('Velocity Setpoint')
-xlabel('time [s]')
-hold off
-
-figure('Name', 'Speed Mode [S]')
-plot(t, speed.data(:,1))
-hold on
-plot(t, speed.data(:,3))
-grid on
-legend(char(speed.colheaders(1)), char(speed.colheaders(3)))
-title('Hum angular Vel and Acc')
-xlabel('time [s]')
-hold off
-
-figure('Name', 'Speed Mode [S]')
-kv_ff = 200;
-plot(t, kv_ff*speed.data(:,3))
-hold on
-plot(t, (1/150)*speed.data(:,5))
-grid on
-legend('k_{ff}^V vel_{hum} [rpm]', '(1/N)*vel_{motor} [rpm]')
-title('Vel Hum X Vel Motor')
-xlabel('time [s]')
-hold off
-
-%% Speed Mode (using two MTw, Hum and Exo) [S*] Plots 
-
-t = linspace(0, dt*length(speed_exo.data(:,1)), length(speed_exo.data(:,1)));
-
-figure('Name', 'Speed Mode [S*]')
-plot(t, speed_exo.data(:,5))
-hold on
-plot(t, speed_exo.data(:,6))
-grid on
-legend(char(speed_exo.colheaders(5)), char(speed_exo.colheaders(6)))
-title('Velocity Setpoint')
-xlabel('time [s]')
-hold off
-
-figure('Name', 'Speed Mode [S*]')
-plot(t, speed_exo.data(:,1))
-hold on
-plot(t, speed_exo.data(:,3))
-grid on
-legend(char(speed_exo.colheaders(1)), char(speed_exo.colheaders(3)))
-title('Hum angular Vel and Acc')
-xlabel('time [s]')
-hold off
-
-figure('Name', 'Speed Mode [S*]')
-plot(t, 200*speed_exo.data(:,3))
-hold on
-plot(t, (1/150)*speed_exo.data(:,5))
-grid on
-legend('k_{ff} vel_{hum} [rpm]', '(1/N)*vel_{motor} [rpm]')
-title('Vel Hum X Vel Motor')
-xlabel('time [s]')
-hold off
-
-%% Position Mode [P] Plots
-
-t = linspace(0, dt*length(positionff.data(:,1)), length(positionff.data(:,1)));
-
-figure('Name', 'Position Mode [P]')
-plot(t, positionff.data(:,1))
-hold on
-plot(t, positionff.data(:,4))
-grid on
-legend( positionff.colheaders{1,1}, positionff.colheaders{1,3})
-title('Human angular Vel and Acc')
-xlabel('time [s]')
-hold off
-
-figure('Name', 'Position Mode [P]')
-plot(t, 104*(positionff.data(:,6) - positionff.data(:,7)) )
-grid on
-legend('T_{sea} [N.m]')
-title('Torque SEA')
-xlabel('time [s]')
-hold off
-
 %%  accBasedController
 abc_data = importdata('2021-02-28-19-10-01.txt');
 t_end = abc_data.data(end,1)
@@ -217,7 +94,6 @@ t_end = abc_data.data(end,1)
 close all
 
 figure, 
-
 subplot(4,1,1)
 plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,3)])), grid on
 legend('velHum','velExo'), ylabel('deg/s')
