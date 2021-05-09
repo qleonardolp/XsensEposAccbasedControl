@@ -90,11 +90,14 @@ hold off
 % abc_data = importdata('abc_acc_motor_/2021-03-28-09-51-40.txt');
 % akf_data = importdata('cac_com_IDcorr_com_ff_fb/akf-2021-03-28-10-41-27.txt');
 % abc_data = importdata('cac_com_IDcorr_com_ff_fb/2021-03-28-10-41-27.txt');
-abc_data = importdata('abc_sem_ID/2021-03-27-21-59-14.txt');
+% abc_data = importdata('abc_sem_ID/2021-03-27-21-59-14.txt');
 % abc_data = importdata('cac_sem_ID_vel_hum/2021-03-27-23-05-07.txt');
-abc_data = importdata('2021-05-08-19-36-25.txt');
-akf_data = importdata('akf-2021-05-08-19-36-25.txt');
-t_end = abc_data.data(end,1)
+% abc_data = importdata('2021-05-08-19-49-00.txt'); %usado para o texto do TCC
+% akf_data = importdata('akf-2021-05-08-19-49-00.txt'); %usado para o texto do TCC
+abc_data = importdata('2021-05-08-19-21-40.txt');
+akf_data = importdata('akf-2021-05-08-19-21-40.txt');
+t_end = abc_data.data(end,1) 
+length(akf_data(:,1))/t_end
 % figure, plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,4)])), grid on
 % legend('velHum','accHum')
 
@@ -153,14 +156,19 @@ hold on,
 plot(akf_data(:,1), rad2deg(akf_data(:,6)))
 title('Act Vel')
 
-figure, plot(abc_data.data(:,1), rad2deg(abc_data.data(:,4))), grid on
+figure, 
+% subplot(1,2,1)
+plot(abc_data.data(:,1), rad2deg(abc_data.data(:,4))), grid on
 hold on,
 plot(akf_data(:,1), rad2deg(akf_data(:,8)))
-title('Hum Acc')
+xlabel('time (s)'), ylabel('deg/s^2')
+% title('Human Acceleration')
 
+% subplot(1,2,2)
 figure, plot(abc_data.data(:,1), rad2deg(abc_data.data(:,5))), grid on
 hold on,
 plot(akf_data(:,1), rad2deg(akf_data(:,9)))
-title('Exo Acc')
+xlabel('time (s)')
+title('Exo Acceleration')
 
 figure, plot(akf_data(:,1), akf_data(:,10)), grid on, title('Int Torque')
