@@ -92,9 +92,10 @@ hold off
 % abc_data = importdata('cac_com_IDcorr_com_ff_fb/2021-03-28-10-41-27.txt');
 abc_data = importdata('abc_sem_ID/2021-03-27-21-59-14.txt');
 % abc_data = importdata('cac_sem_ID_vel_hum/2021-03-27-23-05-07.txt');
-abc_data = importdata('2021-05-08-19-36-25.txt');
-akf_data = importdata('akf-2021-05-08-19-36-25.txt');
-t_end = abc_data.data(end,1)
+abc_data = importdata('2021-05-15-18-10-47.txt');
+akf_data = importdata('akf-2021-05-15-18-10-47.txt');
+t_end = abc_data.data(end,1);
+f_avg = 4*length(akf_data(:,1))/t_end
 % figure, plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,4)])), grid on
 % legend('velHum','accHum')
 
