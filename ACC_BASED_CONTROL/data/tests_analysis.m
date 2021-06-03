@@ -91,22 +91,17 @@ hold off
 % akf_data = importdata('cac_com_IDcorr_com_ff_fb/akf-2021-03-28-10-41-27.txt');
 % abc_data = importdata('cac_com_IDcorr_com_ff_fb/2021-03-28-10-41-27.txt');
 % abc_data = importdata('abc_sem_ID/2021-03-27-21-59-14.txt');
-% abc_data = importdata('cac_sem_ID_vel_hum/2021-03-27-23-05-07.txt');
-% abc_data = importdata('2021-05-08-19-49-00.txt'); %usado para o texto do TCC
-% akf_data = importdata('akf-2021-05-08-19-49-00.txt'); %usado para o texto do TCC
-abc_data = importdata('2021-05-08-19-21-40.txt');
-akf_data = importdata('akf-2021-05-08-19-21-40.txt');
+% abc_data = importdata('cac_sem_ID_vel_hum/2021-03-27-23-05-07.txt'); % !!
+% akf_data = importdata('cac_sem_ID_vel_hum/akf-2021-03-27-23-05-07.txt'); %!!
+abc_data = importdata('2021-05-08-19-49-00.txt'); %usado para o texto do TCC
+akf_data = importdata('akf-2021-05-08-19-49-00.txt'); %usado para o texto do TCC
+% abc_data = importdata('2021-05-08-19-21-40.txt');
+% akf_data = importdata('akf-2021-05-08-19-21-40.txt');
 t_end = abc_data.data(end,1) 
 length(akf_data(:,1))/t_end
 
 % figure, plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,4)])), grid on
 % legend('velHum','accHum')
-
-% abc_sem_ID_log % Avg abs pos error = 1.745 deg (soft) (t 8.2 a 13.2)
-% abc_sem_ID_log % Avg abs pos error = 1.292 deg (rapid) (t 34 a 49)
-
-% cac_sem_ID_log % Avg abs pos error = 1.698 deg (soft) (t 11 a 16)
-% cac_sem_ID_log % Avg abs pos error = 3.168 deg (rapid) (t 45 a 50)
 
 %%
 % close all
@@ -157,15 +152,21 @@ hold on,
 plot(akf_data(:,1), rad2deg(akf_data(:,6)))
 title('Act Vel')
 
-figure, 
-% subplot(1,2,1)
-plot(abc_data.data(:,1), rad2deg(abc_data.data(:,4))), grid on
+% Usando texto do Tcc:
+clc, close all
+figure('Name','Angular acceleration','Color',[1 1 1]),
+plot(abc_data.data(:,1), rad2deg(abc_data.data(:,4)),...
+     'LineStyle','none','Marker','.'), grid on
 hold on,
-plot(akf_data(:,1), rad2deg(akf_data(:,8)))
+plot(akf_data(:,1), rad2deg(akf_data(:,8)),...
+     'LineWidth',1.5)
+ax = gca;
+ax.FontSize = 12; ax.LineWidth = 0.7; ax.GridAlpha = 0.5;
 xlabel('time (s)'), ylabel('deg/s^2')
+legend('FD','Kalman','Orientation','horizontal')
 % title('Human Acceleration')
 
-% subplot(1,2,2)
+
 figure, plot(abc_data.data(:,1), rad2deg(abc_data.data(:,5))), grid on
 hold on,
 plot(akf_data(:,1), rad2deg(akf_data(:,9)))
