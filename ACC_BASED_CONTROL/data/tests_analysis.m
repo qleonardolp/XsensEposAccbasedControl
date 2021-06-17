@@ -152,14 +152,25 @@ hold on,
 plot(akf_data(:,1), rad2deg(akf_data(:,6)))
 title('Act Vel')
 
-% Usando texto do Tcc:
+% Usando no texto do Tcc:
+%%
+fd_acc = zeros(1, 2);
+j = 1;
+for i = 1:length(abc_data.data(:,4))
+    if abc_data.data(i,4) ~= 0
+        fd_acc(j,1) = abc_data.data(i,1);
+        fd_acc(j,2) = abc_data.data(i,4);
+        j = j+1;
+    end
+end
+
 clc, close all
 figure('Name','Angular acceleration','Color',[1 1 1]),
-plot(abc_data.data(:,1), rad2deg(abc_data.data(:,4)),...
-     'LineStyle','none','Marker','.'), grid on
+plot(fd_acc(:,1), rad2deg(fd_acc(:,2)),...
+     'LineWidth',1.0), grid on
 hold on,
-plot(akf_data(:,1), rad2deg(akf_data(:,8)),...
-     'LineWidth',1.5)
+plot(akf_data(:,1), rad2deg(akf_data(:,8)),'-.',...
+     'LineWidth',2.0)
 ax = gca;
 ax.FontSize = 12; ax.LineWidth = 0.7; ax.GridAlpha = 0.5;
 xlabel('time (s)'), ylabel('deg/s^2')
