@@ -93,12 +93,12 @@ hold off
 % abc_data = importdata('abc_sem_ID/2021-03-27-21-59-14.txt');
 % abc_data = importdata('cac_sem_ID_vel_hum/2021-03-27-23-05-07.txt'); % !!
 % akf_data = importdata('cac_sem_ID_vel_hum/akf-2021-03-27-23-05-07.txt'); %!!
-abc_data = importdata('2021-05-08-19-49-00.txt'); %usado para o texto do TCC
-akf_data = importdata('akf-2021-05-08-19-49-00.txt'); %usado para o texto do TCC
-% abc_data = importdata('2021-05-08-19-21-40.txt');
-% akf_data = importdata('akf-2021-05-08-19-21-40.txt');
+% abc_data = importdata('2021-05-08-19-49-00.txt'); %usado para o texto do TCC
+% akf_data = importdata('akf-2021-05-08-19-49-00.txt'); %usado para o texto do TCC
+abc_data = importdata('2021-09-14-19-22-41.txt');
+akf_data = importdata('akf-2021-09-14-19-22-41.txt');
 t_end = abc_data.data(end,1) 
-length(akf_data(:,1))/t_end
+length(akf_data(:,1))/t_end*4
 
 % figure, plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,4)])), grid on
 % legend('velHum','accHum')
