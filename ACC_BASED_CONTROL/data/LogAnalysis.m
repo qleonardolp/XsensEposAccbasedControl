@@ -51,7 +51,7 @@ yline(CURRENT_MAX,'--r',{'I_{max}'})
 yline(-CURRENT_MAX,'--r'), grid on
 legend('Motor I_d'), ylabel('A')
 
-%% AKF comparative
+%% KF comparative
 % obs: vel_act and m_current is probably missing on zk
 
 figure, plot(abc_data.data(:,1), rad2deg(abc_data.data(:,2))), grid on
