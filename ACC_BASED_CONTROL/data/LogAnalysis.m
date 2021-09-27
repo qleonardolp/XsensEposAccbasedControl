@@ -12,10 +12,10 @@ close all
 % akf_data = importdata('cac_sem_ID_vel_hum/akf-2021-03-27-23-05-07.txt'); %!!
 % abc_data = importdata('2021-05-08-19-49-00.txt'); %usado para o texto do TCC
 % akf_data = importdata('akf-2021-05-08-19-49-00.txt'); %usado para o texto do TCC
-abc_data = importdata('2021-09-14-19-22-41.txt');
+abc_data = importdata('2021-09-27-18-24-51.txt');
 akf_data = importdata('akf-2021-09-14-19-22-41.txt');
-t_end = abc_data.data(end,1) 
-length(akf_data(:,1))/t_end*4
+t_end = abc_data(end,1) 
+length(abc_data(:,1))/t_end*4
 
 % figure, plot(abc_data.data(:,1), rad2deg([abc_data.data(:,2) abc_data.data(:,4)])), grid on
 % legend('velHum','accHum')
@@ -70,6 +70,25 @@ figure, plot(abc_data.data(:,1), rad2deg(abc_data.data(:,8))), grid on
 hold on,
 plot(akf_data(:,1), rad2deg(akf_data(:,6)))
 title('Act Vel')
+
+%% Comparative without KF (Vel x Acc)
+% obs: vel_act and m_current is probably missing on zk
+
+figure, plot(abc_data(:,1), rad2deg(abc_data(:,2))), grid on
+hold on,
+plot(abc_data(:,1), rad2deg(abc_data(:,4)))
+title('Hum Vel')
+
+figure, plot(abc_data(:,1), rad2deg(abc_data(:,3))), grid on
+hold on,
+plot(abc_data(:,1), rad2deg(abc_data(:,5)))
+title('Exo Vel')
+
+figure, plot(abc_data(:,1), rad2deg(abc_data(:,8))), grid on
+hold on,
+plot(abc_data(:,1), rad2deg(abc_data(:,9)))
+title('Act Vel')
+
 
 % Usando no texto do Tcc:
 %%
