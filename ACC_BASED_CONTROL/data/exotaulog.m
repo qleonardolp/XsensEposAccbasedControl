@@ -36,10 +36,11 @@ opts.VariableTypes = ["single", "single", "single", "single", "single", "single"
 
 
 % Specify file level properties
-opts.ImportErrorRule = "omitvar";
+opts.ImportErrorRule = "omitrow";
 opts.MissingRule = "omitvar";
 opts.ExtraColumnsRule = "ignore";
 opts.EmptyLineRule = "read";
+
 
 % Import the data
 exotaulog = readtable(filename, opts);
@@ -48,9 +49,19 @@ exotaulog = readtable(filename, opts);
 exotaulog = table2array(exotaulog);
 
 % Compare Velocities (deg/s):
-plot(exotaulog(:,1), rad2deg(exotaulog(:,3))), hold on
-plot(exotaulog(:,1), rad2deg(exotaulog(:,6))), grid on
-legend('user','robot')
-title('Velocities (deg/s)')
-hold off
+% plot(exotaulog(:,1), rad2deg(exotaulog(:,3))), hold on
+% plot(exotaulog(:,1), rad2deg(exotaulog(:,6))), grid on
+% legend('user','robot')
+% title('Velocities (deg/s)')
+% hold off
+
+% plot(exotaulog(:,1), rad2deg(exotaulog(:,2))), hold on
+% plot(exotaulog(:,1), rad2deg(exotaulog(:,3))), grid on
+% plot(exotaulog(:,1), rad2deg(exotaulog(:,4)))
+% hold off
+
+plot(exotaulog(:,1), rad2deg(exotaulog(:,2))), hold on
+plot(exotaulog(:,1), rad2deg(exotaulog(:,5))), grid on
+
+
 end
